@@ -1,4 +1,7 @@
 {
-  "cleanUrls": true,
-  "trailingSlash": false
+  "rewrites": [
+    { "source": "/game", "destination": "/game/index.html" },
+    { "source": "/book", "destination": "/book/index.html" },
+    { "source": "/book/entry-1", "destination": "/book/entry-1/index.html" }
+  ]
 }
