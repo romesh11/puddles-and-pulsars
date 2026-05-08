@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Puddles & Pulsars — A Book in the Making | Puddles & Pulsar</title>
+  <meta name="description" content="Puddles & Pulsars is a book being written one thought at a time — from a Konkan coast, a city left behind, and everything in between." />
+  <meta name="robots" content="index, follow" />
+  <link rel="canonical" href="https://puddlesandpulsars.com/book" />
+
+  <meta property="og:type" content="book" />
+  <meta property="og:url" content="https://puddlesandpulsars.com/book" />
+  <meta property="og:title" content="Puddles & Pulsars — A Book in the Making" />
+  <meta property="og:description" content="Thoughts as they arrive. Written from the edge of a coast, a city left behind, and everything in between." />
+  <meta property="og:image" content="https://puddlesandpulsars.com/og-image.png" />
+  <meta property="og:site_name" content="Puddles & Pulsar" />
+
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Puddles & Pulsars — A Book in the Making" />
+  <meta name="twitter:description" content="Thoughts as they arrive. Written from the edge of a coast, a city left behind, and everything in between." />
+  <meta name="twitter:image" content="https://puddlesandpulsars.com/og-image.png" />
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Book",
+    "name": "Puddles & Pulsars",
+    "url": "https://puddlesandpulsars.com/book",
+    "description": "Thoughts as they arrive. Written from the edge of a coast, a city left behind, and everything in between.",
+    "inLanguage": "en-IN",
+    "publisher": {
+      "@type": "Organization",
+      "name": "Puddles & Pulsar",
+      "url": "https://puddlesandpulsars.com"
+    }
+  }
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --black:       #000000;
+      --surface:     rgba(255,255,255,0.03);
+      --surface-hov: rgba(255,255,255,0.06);
+      --border:      rgba(255,255,255,0.08);
+      --border-hov:  rgba(167,139,250,0.3);
+      --text-primary:   #f1f5f9;
+      --text-secondary: #475569;
+      --text-muted:     #334155;
+      --accent:      #a78bfa;
+      --font-sans:   'DM Sans', system-ui, -apple-system, sans-serif;
+      --font-serif:  'DM Serif Display', Georgia, serif;
+      --radius:      16px;
+      --transition:  0.2s ease;
+    }
+
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+
+    body {
+      background: var(--black);
+      color: var(--text-primary);
+      font-family: var(--font-sans);
+      min-height: 100vh;
+      min-height: 100dvh;
+      overflow-x: hidden;
+    }
+
+    .skip-link {
+      position: absolute;
+      top: -100px;
+      left: 1rem;
+      background: var(--accent);
+      color: #000;
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      z-index: 1000;
+    }
+    .skip-link:focus { top: 1rem; }
+
+    .bg-canvas {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    .page {
+      position: relative;
+      z-index: 10;
+      min-height: 100vh;
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      padding: clamp(1.25rem, 3vw, 1.5rem) clamp(1.25rem, 5vw, 2rem);
+      border-bottom: 0.5px solid rgba(255,255,255,0.06);
+    }
+
+    .logo {
+      font-size: clamp(0.85rem, 2vw, 0.95rem);
+      font-weight: 500;
+      color: var(--text-primary);
+      text-decoration: none;
+      letter-spacing: 0.02em;
+    }
+    .logo span { color: var(--accent); }
+
+    .book-hero {
+      padding: clamp(2rem, 5vw, 2.5rem) clamp(1.25rem, 5vw, 2rem) clamp(1rem, 3vw, 1.5rem);
+    }
+
+    .book-eyebrow {
+      font-size: 0.68rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 0.75rem;
+    }
+
+    .book-title {
+      font-family: var(--font-serif);
+      font-size: clamp(1.8rem, 5vw, 2.4rem);
+      font-weight: 400;
+      color: var(--text-primary);
+      margin: 0 0 0.5rem;
+      line-height: 1.1;
+    }
+
+    .book-subtitle {
+      font-size: clamp(0.82rem, 2vw, 0.9rem);
+      color: var(--text-secondary);
+      line-height: 1.75;
+      max-width: 440px;
+    }
+
+    .book-divider {
+      margin: clamp(1rem, 3vw, 1.5rem) clamp(1.25rem, 5vw, 2rem);
+      height: 0.5px;
+      background: rgba(255,255,255,0.06);
+    }
+
+    .book-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: clamp(0.75rem, 2vw, 1rem);
+      padding: 0 clamp(1.25rem, 5vw, 2rem) clamp(2rem, 5vw, 3rem);
+      flex: 1;
+      align-content: start;
+    }
+
+    .book-card {
+      position: relative;
+      background: var(--surface);
+      border: 0.5px solid var(--border);
+      border-radius: var(--radius);
+      padding: clamp(1.1rem, 3vw, 1.4rem);
+      text-decoration: none;
+      display: block;
+      transition: background var(--transition), border-color var(--transition), transform var(--transition);
+      -webkit-tap-highlight-color: transparent;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+
+    .book-card:hover {
+      background: var(--surface-hov);
+      border-color: var(--border-hov);
+      transform: translateY(-2px);
+    }
+
+    .book-card:focus-visible {
+      outline: 1.5px solid var(--accent);
+      outline-offset: 2px;
+    }
+
+    /* faint entry number in corner */
+    .card-num {
+      position: absolute;
+      top: 1rem;
+      right: 1.1rem;
+      font-size: 0.6rem;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      opacity: 0.4;
+      font-weight: 300;
+    }
+
+    .card-title {
+      font-family: var(--font-serif);
+      font-size: clamp(1rem, 2.5vw, 1.15rem);
+      font-weight: 400;
+      font-style: italic;
+      color: #e2e8f0;
+      margin: 0 0 0.6rem;
+      line-height: 1.25;
+      padding-right: 1.5rem;
+    }
+
+    .card-excerpt {
+      font-size: clamp(0.75rem, 1.8vw, 0.78rem);
+      color: var(--text-secondary);
+      line-height: 1.65;
+      margin: 0;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .card-read {
+      display: inline-block;
+      margin-top: 1rem;
+      font-size: 0.65rem;
+      letter-spacing: 0.09em;
+      text-transform: uppercase;
+      color: var(--accent);
+    }
+
+    /* placeholder cards */
+    .card-placeholder { cursor: default; }
+    .card-placeholder:hover { background: var(--surface); border-color: var(--border); transform: none; }
+    .card-placeholder .card-title { color: var(--text-muted); font-style: normal; opacity: 0.4; }
+    .card-placeholder .card-excerpt { color: var(--text-muted); opacity: 0.3; }
+    .card-placeholder .card-read { color: var(--text-muted); opacity: 0.3; }
+    .card-placeholder .card-num { opacity: 0.15; }
+
+    footer {
+      padding: clamp(1rem, 3vw, 1.5rem) clamp(1.25rem, 5vw, 2rem);
+      color: #1e293b;
+      font-size: 0.75rem;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .book-card { transition: none; }
+    }
+
+    @media (max-width: 480px) {
+      .book-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <a href="#main" class="skip-link">Skip to content</a>
+
+  <svg class="bg-canvas" viewBox="0 0 700 600" preserveAspectRatio="xMidYMid slice"
+       xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+    <circle cx="45"  cy="28"  r="0.8" fill="#fff" opacity="0.4"/>
+    <circle cx="118" cy="75"  r="0.5" fill="#fff" opacity="0.3"/>
+    <circle cx="198" cy="18"  r="0.7" fill="#fff" opacity="0.5"/>
+    <circle cx="308" cy="52"  r="0.6" fill="#fff" opacity="0.35"/>
+    <circle cx="428" cy="14"  r="0.9" fill="#fff" opacity="0.45"/>
+    <circle cx="518" cy="68"  r="0.5" fill="#fff" opacity="0.25"/>
+    <circle cx="598" cy="28"  r="0.8" fill="#fff" opacity="0.4"/>
+    <circle cx="658" cy="88"  r="0.6" fill="#fff" opacity="0.3"/>
+    <circle cx="68"  cy="138" r="0.5" fill="#fff" opacity="0.25"/>
+    <circle cx="158" cy="168" r="0.7" fill="#fff" opacity="0.35"/>
+    <circle cx="268" cy="108" r="0.5" fill="#fff" opacity="0.3"/>
+    <circle cx="368" cy="148" r="1"   fill="#fff" opacity="0.45"/>
+    <circle cx="478" cy="118" r="0.6" fill="#fff" opacity="0.3"/>
+    <circle cx="568" cy="158" r="0.8" fill="#fff" opacity="0.35"/>
+    <circle cx="338" cy="38"  r="1.1" fill="#c4b5fd" opacity="0.35"/>
+    <circle cx="578" cy="98"  r="0.9" fill="#c4b5fd" opacity="0.28"/>
+    <circle cx="138" cy="58"  r="0.7" fill="#bfdbfe" opacity="0.28"/>
+    <circle cx="400" cy="90"  r="0.5" fill="#fff"    opacity="0.25"/>
+    <circle cx="55"  cy="290" r="0.6" fill="#fff"    opacity="0.18"/>
+    <circle cx="680" cy="320" r="0.5" fill="#fff"    opacity="0.18"/>
+  </svg>
+
+  <div class="page">
+    <header>
+      <a href="/" class="logo">puddles <span>&</span> pulsar</a>
+    </header>
+
+    <main id="main">
+      <div class="book-hero">
+        <p class="book-eyebrow">A book in the making</p>
+        <h1 class="book-title">Puddles & Pulsars</h1>
+        <p class="book-subtitle">Thoughts as they arrive. Written from the edge of a coast, a city left behind, and everything in between.</p>
+      </div>
+
+      <div class="book-divider"></div>
+
+      <section class="book-grid" aria-label="Book entries">
+
+        <a class="book-card" href="/book/entry-1">
+          <span class="card-num">01</span>
+          <h2 class="card-title">The Unnamed Pull</h2>
+          <p class="card-excerpt">The birds are already at it. Frantic, diving, loud — working the shoreline like they have somewhere to be. The dogs aren't paying attention. Salt-heavy and unbothered...</p>
+          <span class="card-read">Read →</span>
+        </a>
+
+        <div class="book-card card-placeholder" aria-hidden="true">
+          <span class="card-num">02</span>
+          <h2 class="card-title">Coming soon</h2>
+          <p class="card-excerpt">The next entry is being written.</p>
+          <span class="card-read">—</span>
+        </div>
+
+        <div class="book-card card-placeholder" aria-hidden="true">
+          <span class="card-num">03</span>
+          <h2 class="card-title">Coming soon</h2>
+          <p class="card-excerpt">The next entry is being written.</p>
+          <span class="card-read">—</span>
+        </div>
+
+      </section>
+    </main>
+
+    <footer>
+      <p>© 2026 Puddles & Pulsar</p>
+    </footer>
+  </div>
+
+</body>
+</html>
