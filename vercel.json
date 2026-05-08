@@ -1,13 +1,13 @@
 {
   "cleanUrls": true,
   "rewrites": [
-    { "source": "/game", "destination": "/game/index.html" },
+    { "source": "/game", "destination": "/game.html" },
     { "source": "/book", "destination": "/book/index.html" },
     { "source": "/book/entry-1", "destination": "/book/entry-1/index.html" }
   ],
   "headers": [
     {
-      "source": "/game/index.html",
+      "source": "/game.html",
       "headers": [
         { "key": "Content-Type", "value": "text/html; charset=utf-8" }
       ]
