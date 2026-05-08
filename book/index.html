@@ -243,7 +243,14 @@
     @media (prefers-reduced-motion: reduce) {
       .book-card { transition: none; }
     }
-
+.bg-lower {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      width: 100%;
+      height: 100%;
+    }
     @media (max-width: 480px) {
       .book-grid { grid-template-columns: 1fr; }
     }
@@ -331,6 +338,19 @@
     <footer>
       <p>© 2026 Puddles & Pulsar</p>
     </footer>
+ <svg class="bg-lower" viewBox="0 0 700 400" preserveAspectRatio="xMidYMid slice"
+       xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <circle cx="150" cy="60"  r="0.6" fill="#fff"    opacity="0.15"/>
+    <circle cx="420" cy="80"  r="0.5" fill="#fff"    opacity="0.13"/>
+    <circle cx="560" cy="120" r="0.7" fill="#c4b5fd" opacity="0.15"/>
+    <circle cx="80"  cy="160" r="0.5" fill="#fff"    opacity="0.12"/>
+    <circle cx="320" cy="200" r="0.4" fill="#fff"    opacity="0.1"/>
+    <circle cx="600" cy="220" r="0.6" fill="#fff"    opacity="0.12"/>
+    <circle cx="200" cy="280" r="0.5" fill="#c4b5fd" opacity="0.1"/>
+    <circle cx="480" cy="320" r="0.4" fill="#fff"    opacity="0.1"/>
+    <circle cx="40"  cy="360" r="0.6" fill="#fff"    opacity="0.1"/>
+    <circle cx="360" cy="380" r="0.5" fill="#c4b5fd" opacity="0.1"/>
+  </svg>
   </div>
 
 </body>
