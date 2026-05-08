@@ -84,7 +84,7 @@
     .skip-link:focus { top: 1rem; }
 
     .bg-canvas {
-      position: absolute;
+      position: fixed;
       inset: 0;
       pointer-events: none;
       z-index: 0;
@@ -243,14 +243,7 @@
     @media (prefers-reduced-motion: reduce) {
       .book-card { transition: none; }
     }
-.bg-lower {
-      position: absolute;
-      inset: 0;
-      pointer-events: none;
-      z-index: 0;
-      width: 100%;
-      height: 100%;
-    }
+
     @media (max-width: 480px) {
       .book-grid { grid-template-columns: 1fr; }
     }
@@ -260,7 +253,7 @@
 
   <a href="#main" class="skip-link">Skip to content</a>
 
-  <svg class="bg-canvas" viewBox="0 0 700 900" preserveAspectRatio="xMidYMid slice"
+  <svg class="bg-canvas" viewBox="0 0 700 600" preserveAspectRatio="xMidYMid slice"
        xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
     <circle cx="45"  cy="28"  r="0.8" fill="#fff" opacity="0.4"/>
     <circle cx="118" cy="75"  r="0.5" fill="#fff" opacity="0.3"/>
@@ -281,18 +274,22 @@
     <circle cx="138" cy="58"  r="0.7" fill="#bfdbfe" opacity="0.28"/>
     <circle cx="400" cy="90"  r="0.5" fill="#fff"    opacity="0.25"/>
     <circle cx="55"  cy="290" r="0.6" fill="#fff"    opacity="0.18"/>
-    <circle cx="680" cy="320" r="0.5" fill="#fff" opacity="0.18"/>
-    <circle cx="150" cy="320" r="0.6" fill="#fff" opacity="0.15"/>
-    <circle cx="420" cy="280" r="0.5" fill="#fff" opacity="0.13"/>
-    <circle cx="560" cy="360" r="0.7" fill="#c4b5fd" opacity="0.15"/>
-    <circle cx="80"  cy="420" r="0.5" fill="#fff" opacity="0.12"/>
-    <circle cx="320" cy="400" r="0.4" fill="#fff" opacity="0.1"/>
-    <circle cx="600" cy="450" r="0.6" fill="#fff" opacity="0.12"/>
-    <circle cx="200" cy="480" r="0.5" fill="#c4b5fd" opacity="0.1"/>
-    <circle cx="480" cy="520" r="0.4" fill="#fff" opacity="0.1"/>
-    <circle cx="700" cy="500" r="0.5" fill="#fff" opacity="0.1"/>
-    <circle cx="40"  cy="540" r="0.6" fill="#fff" opacity="0.1"/>
-    <circle cx="360" cy="560" r="0.5" fill="#c4b5fd" opacity="0.1"/>
+    <circle cx="680" cy="320" r="0.5" fill="#fff"    opacity="0.18"/>
+    <circle cx="150" cy="240" r="0.5" fill="#fff"    opacity="0.15"/>
+    <circle cx="420" cy="260" r="0.4" fill="#fff"    opacity="0.13"/>
+    <circle cx="560" cy="300" r="0.6" fill="#c4b5fd" opacity="0.14"/>
+    <circle cx="80"  cy="350" r="0.5" fill="#fff"    opacity="0.12"/>
+    <circle cx="320" cy="370" r="0.4" fill="#fff"    opacity="0.11"/>
+    <circle cx="600" cy="390" r="0.5" fill="#fff"    opacity="0.12"/>
+    <circle cx="200" cy="420" r="0.5" fill="#c4b5fd" opacity="0.11"/>
+    <circle cx="480" cy="440" r="0.4" fill="#fff"    opacity="0.1"/>
+    <circle cx="40"  cy="470" r="0.5" fill="#fff"    opacity="0.1"/>
+    <circle cx="360" cy="490" r="0.4" fill="#c4b5fd" opacity="0.1"/>
+    <circle cx="650" cy="460" r="0.5" fill="#fff"    opacity="0.1"/>
+    <circle cx="270" cy="530" r="0.4" fill="#fff"    opacity="0.09"/>
+    <circle cx="520" cy="550" r="0.5" fill="#c4b5fd" opacity="0.09"/>
+    <circle cx="100" cy="560" r="0.4" fill="#fff"    opacity="0.09"/>
+    <circle cx="440" cy="580" r="0.5" fill="#fff"    opacity="0.08"/>
   </svg>
 
   <div class="page">
@@ -338,19 +335,6 @@
     <footer>
       <p>© 2026 Puddles & Pulsar</p>
     </footer>
- <svg class="bg-lower" viewBox="0 0 700 400" preserveAspectRatio="xMidYMid slice"
-       xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-    <circle cx="150" cy="60"  r="0.6" fill="#fff"    opacity="0.15"/>
-    <circle cx="420" cy="80"  r="0.5" fill="#fff"    opacity="0.13"/>
-    <circle cx="560" cy="120" r="0.7" fill="#c4b5fd" opacity="0.15"/>
-    <circle cx="80"  cy="160" r="0.5" fill="#fff"    opacity="0.12"/>
-    <circle cx="320" cy="200" r="0.4" fill="#fff"    opacity="0.1"/>
-    <circle cx="600" cy="220" r="0.6" fill="#fff"    opacity="0.12"/>
-    <circle cx="200" cy="280" r="0.5" fill="#c4b5fd" opacity="0.1"/>
-    <circle cx="480" cy="320" r="0.4" fill="#fff"    opacity="0.1"/>
-    <circle cx="40"  cy="360" r="0.6" fill="#fff"    opacity="0.1"/>
-    <circle cx="360" cy="380" r="0.5" fill="#c4b5fd" opacity="0.1"/>
-  </svg>
   </div>
 
 </body>
