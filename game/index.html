@@ -606,7 +606,7 @@ function showWin() {
   }
 }
 
-function playAgain() { randomiseCards(); }
+function playAgain() { document.getElementById('registration-screen').style.display='flex'; document.getElementById('game-screen').style.display='none'; }
 
 function saveData() {
   if (allPlayers.length === 0) { showToast('No data to save yet.','wrong'); return; }
