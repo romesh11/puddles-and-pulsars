@@ -606,7 +606,7 @@ function showWin() {
   }
 }
 
-function playAgain() { document.getElementById('reg-screen').style.display='flex'; document.getElementById('game-screen').style.display='none'; }
+function playAgain() { document.getElementById('reg-screen').style.display='flex'; document.getElementById('game-screen').style.display='none'; document.getElementById('win-screen').style.display='none'; }
 
 function saveData() {
   if (allPlayers.length === 0) { showToast('No data to save yet.','wrong'); return; }
