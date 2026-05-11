@@ -751,6 +751,57 @@ let logoClickTimer = null;
 const EF = {carKm:.19,twoWKm:.05,pubKm:.03,flightHrs:90,acHr:1.23,elecKwh:.82,geyserHr:1.64,lpgCyl:29.82,laundry:.6,meat:2.5,redMeat:7,dairy:1.6,foodWaste:2.5,water:.001,delivery:.8,clothes:7,plastic:6,stream:.036,waste:.5};
 const OF = {compost:.5,solar:.82,rainwater:.001,cycling:.19,trees:1.75,secondhand:7,veg:2,noPlastic:6,carpool:.095,ev:.14};
 
+async function saveUserToSupabase(user) {
+  try {
+    await fetch(`${SUPABASE_URL}/rest/v1/ripple_users`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${SUPABASE_KEY}`,
+        'Prefer': 'return=minimal'
+      },
+      body: JSON.stringify({
+        name: user.name,
+        email: user.email,
+        password: user.password,
+        age: String(user.age),
+        role: user.role,
+        past_lifestyle: String(user.pastLifestyle),
+        created_at: new Date().toLocaleString()
+      })
+    });
+  } catch(e) { console.log('Supabase user save failed:', e); }
+}
+
+async function saveLogToSupabase(r) {
+  try {
+    await fetch(`${SUPABASE_URL}/rest/v1/ripple_logs`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${SUPABASE_KEY}`,
+        'Prefer': 'return=minimal'
+      },
+      body: JSON.stringify({
+        user_email: currentUser.email,
+        user_name: currentUser.name,
+        period: r.timeMode,
+        mob: String(Math.round(r.mob)),
+        home: String(Math.round(r.home)),
+        food: String(Math.round(r.food)),
+        life: String(Math.round(r.life)),
+        gross: String(Math.round(r.gross)),
+        offsets: String(Math.round(r.totalOffset)),
+        net: String(Math.round(r.net)),
+        trees: String(r.trees),
+        lifetime: r.lifetime.totalTonnes,
+        date: new Date().toLocaleString()
+      })
+    });
+  } catch(e) { console.log('Supabase log save failed:', e); }
+}
 const ALL_ACTIONS = [
   {cat:'mob', bg:'#E6F1FB', tc:'#185FA5', impact:'-15 kg', text:'Use public transport for 2 commute days this week'},
   {cat:'mob', bg:'#E6F1FB', tc:'#185FA5', impact:'-8 kg',  text:'Walk or cycle for trips under 2 km'},
