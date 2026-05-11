@@ -799,6 +799,7 @@ async function saveLogToSupabase(r) {
         trees: String(r.trees),
         lifetime: r.lifetime.totalTonnes,
         date: new Date().toLocaleString()
+        created_at: new Date().toLocaleString()
       })
     });
   } catch(e) { console.log('Supabase log save failed:', e); alert('Save failed: ' + e.message); }
