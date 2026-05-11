@@ -852,18 +852,34 @@ function switchAuthTab(tab, el) {
   document.getElementById('auth-signup').style.display = tab === 'signup' ? 'block' : 'none';
 }
 
-function doLogin() {
+async function doLogin() {
   const email = document.getElementById('l-email').value.trim();
   const pass = document.getElementById('l-pass').value;
   if (!email || !pass) { alert('Please enter your email and password.'); return; }
   if (currentUser.role === 'admin') {
     const adminPass = document.getElementById('l-admin-pass').value;
     if (adminPass !== ADMIN_PASS) { alert('Incorrect admin password.'); return; }
-    currentUser = {name:'Admin', age:35, role:'admin', pastLifestyle:1900};
-  } else {
-    currentUser = {name: email.split('@')[0].replace(/[._]/g,' ').replace(/\b\w/g,c=>c.toUpperCase()), age:28, role:'member', pastLifestyle:1900};
+    currentUser = {name:'Admin', email:'admin@ripple', age:35, role:'admin', pastLifestyle:1900};
+    launchApp();
+    return;
   }
-  launchApp();
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/ripple_users?email=eq.${encodeURIComponent(email)}&select=*`, {
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${SUPABASE_KEY}`
+      }
+    });
+    const users = await res.json();
+    if (!users || users.length === 0) { alert('No account found with that email. Please sign up first.'); return; }
+    const user = users[0];
+    if (user.password !== pass) { alert('Incorrect password. Please try again.'); return; }
+    currentUser = {name: user.name, email: user.email, age: parseInt(user.age), role: user.role, pastLifestyle: parseInt(user.past_lifestyle)};
+    launchApp();
+  } catch(e) {
+    alert('Login failed. Please check your connection and try again.');
+    console.log('Login error:', e);
+  }
 }
 
 function doSignup() {
