@@ -93,7 +93,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);fon
 .mob-menu{background:none;border:none;cursor:pointer;padding:4px;color:var(--text2)}
 
 /* MAIN */
-.main{margin-left:220px;flex:1;padding:1.75rem;max-width:1400px;width:100%}
+.main{margin-left:220px;flex:1;padding:1.75rem;max-width:900px}
 .page{display:none}
 .page.active{display:block;animation:fadeIn .2s ease}
 @keyframes fadeIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
@@ -126,8 +126,10 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);fon
 .chart-empty{display:flex;align-items:center;justify-content:center;height:160px;background:var(--surface2);border-radius:var(--rs);font-size:0.78rem;color:var(--text4)}
 
 /* ACTIONS */
-.action-scroll{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}
+.action-scroll{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none;-ms-overflow-style:none;scroll-behavior:smooth}
 .action-scroll::-webkit-scrollbar{display:none}
+.action-scroll-wrap{position:relative}
+.action-scroll-wrap::after{content:'';position:absolute;right:0;top:0;bottom:4px;width:48px;background:linear-gradient(to right,transparent,var(--surface));pointer-events:none;border-radius:0 var(--rs) var(--rs) 0}
 .ac{min-width:145px;border-radius:12px;padding:12px;flex-shrink:0}
 .ac-impact{font-size:0.95rem;font-weight:600;margin-bottom:3px}
 .ac-text{font-size:0.72rem;line-height:1.45}
@@ -378,6 +380,16 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);fon
         <div class="chart-wrap" id="trend-wrap" style="display:none"><canvas id="dash-trend" aria-label="Emissions trend over time"></canvas></div>
       </div>
 
+      <!-- QUICK WINS -->
+      <div class="card" style="margin-bottom:.75rem">
+        <p class="sec-label">Quick wins for you</p>
+        <div class="action-scroll-wrap">
+          <div class="action-scroll" id="dash-actions">
+            <div class="ac" style="background:var(--teal-l)"><div class="ac-impact" style="color:var(--teal-d)">—</div><div class="ac-text" style="color:var(--teal)">Log activity to see personalised actions</div></div>
+          </div>
+        </div>
+      </div>
+
       <!-- HISTORY TABLE -->
       <div class="card" style="margin-bottom:.75rem">
         <p class="sec-label">Full history</p>
@@ -387,14 +399,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);fon
             <thead><tr><th>Date</th><th>Period</th><th>Emissions</th><th>Offsets</th><th>Net</th><th>Status</th></tr></thead>
             <tbody id="history-tbody"></tbody>
           </table>
-        </div>
-      </div>
-
-      <!-- QUICK WINS -->
-      <div class="card">
-        <p class="sec-label">Quick wins for you</p>
-        <div class="action-scroll" id="dash-actions">
-          <div class="ac" style="background:var(--teal-l)"><div class="ac-impact" style="color:var(--teal-d)">—</div><div class="ac-text" style="color:var(--teal)">Log activity to see personalised actions</div></div>
         </div>
       </div>
     </div>
@@ -715,7 +719,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);fon
         <div class="card" style="margin-bottom:.75rem">
           <p class="sec-label">Actions to reach zero — realistic for everyday life</p>
           <p style="font-size:0.72rem;color:var(--text3);margin-bottom:.85rem">Personalised to your biggest emission sources</p>
-          <div class="action-scroll" id="action-cards"></div>
+          <div class="action-scroll-wrap"><div class="action-scroll" id="action-cards"></div></div>
         </div>
 
         <!-- CHART -->
