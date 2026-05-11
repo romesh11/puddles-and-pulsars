@@ -776,6 +776,7 @@ async function saveUserToSupabase(user) {
 
 async function saveLogToSupabase(r) {
   try {
+    console.log('Saving to Supabase:', JSON.stringify({user_email: currentUser.email, user_name: currentUser.name}));
     await fetch(`${SUPABASE_URL}/rest/v1/ripple_logs`, {
       method: 'POST',
       headers: {
@@ -800,7 +801,7 @@ async function saveLogToSupabase(r) {
         date: new Date().toLocaleString()
       })
     });
-  } catch(e) { console.log('Supabase log save failed:', e); }
+  } catch(e) { console.log('Supabase log save failed:', e); alert('Save failed: ' + e.message); }
 }
 const ALL_ACTIONS = [
   {cat:'mob', bg:'#E6F1FB', tc:'#185FA5', impact:'-15 kg', text:'Use public transport for 2 commute days this week'},
