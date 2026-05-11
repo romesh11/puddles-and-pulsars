@@ -874,7 +874,8 @@ function doSignup() {
   const lifestyle = parseInt(document.getElementById('s-lifestyle').value) || 1900;
   if (!name || !email || !pass) { alert('Please fill in all fields.'); return; }
   if (age < 13) { alert('Tracking starts from age 13.'); return; }
-  currentUser = {name, age, role:'member', pastLifestyle: lifestyle};
+  currentUser = {name, age, email, role:'member', pastLifestyle: lifestyle};
+  saveUserToSupabase({name, email, password: pass, age, role:'member', pastLifestyle: lifestyle});
   launchApp();
 }
 
@@ -888,12 +889,37 @@ function launchApp() {
   if (currentUser.role === 'admin') {
     document.getElementById('admin-nav').style.display = 'block';
     showPage('admin', document.getElementById('nav-admin'));
+    loadAdminData();
   }
   updateDashboard();
 }
 
 function logout() { location.reload(); }
-
+async function loadAdminData() {
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/ripple_logs?select=*`, {
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${SUPABASE_KEY}`
+      }
+    });
+    const logs = await res.json();
+    if (!logs || !logs.length) return;
+    document.getElementById('a-members').textContent = [...new Set(logs.map(l=>l.user_email))].length;
+    const total = logs.reduce((s,l)=>s+parseInt(l.net||0),0);
+    const avg = Math.round(total/logs.length);
+    document.getElementById('a-total').textContent = total;
+    document.getElementById('a-avg').textContent = avg;
+    const best = logs.reduce((p,c)=>parseInt(p.net)<parseInt(c.net)?p:c);
+    document.getElementById('a-best').textContent = best.user_name.split(' ')[0];
+    document.getElementById('admin-tbody').innerHTML = logs.map(l => {
+      const net = parseInt(l.net||0);
+      const status = net < 100 ? '<span class="badge badge-green">Low</span>' : net < 250 ? '<span class="badge badge-amber">Medium</span>' : '<span class="badge badge-red">High</span>';
+      return `<tr><td style="font-weight:500;color:var(--text)">${l.user_name}</td><td>${l.mob}</td><td>${l.home}</td><td>${l.food}</td><td>${l.life}</td><td style="color:var(--teal)">−${l.offsets}</td><td style="font-weight:600">${l.net}</td><td>${status}</td></tr>`;
+    }).join('');
+  } catch(e) { console.log('Admin load failed:', e); }
+}
+  
 function showPage(id, el) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.sb-item').forEach(n => n.classList.remove('active'));
@@ -953,6 +979,7 @@ function calculate() {
   const trees = Math.ceil(net / OF.trees);
   const lifetime = calcLifetime(gross);
   calcResult = {mob,home,food,life,gross,totalOffset,offBreakdown,net,trees,lifetime,timeMode};
+  saveLogToSupabase(calcResult);
   updateDashboard();
   renderResults();
   showPage('results', document.getElementById('nav-results'));
