@@ -330,51 +330,66 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);fon
 
     <!-- DASHBOARD -->
     <div class="page active" id="page-dashboard">
-      <h1 class="ph-title">Your carbon snapshot</h1>
-      <p class="ph-sub">Current period footprint and lifetime total</p>
-      <div class="banner">
+      <h1 class="ph-title">Your carbon story</h1>
+      <p class="ph-sub" id="dash-sub">Log activity to start tracking your footprint</p>
+
+      <!-- CUMULATIVE BANNER -->
+      <div class="banner" id="dash-banner">
         <div>
-          <p class="banner-label">Lifetime carbon footprint</p>
-          <div class="banner-val" id="dash-lifetime">—</div>
-          <p class="banner-unit">tonnes CO₂e since age 13</p>
+          <p class="banner-label">Total emissions since you joined</p>
+          <div class="banner-val" id="dash-total-gross">—</div>
+          <p class="banner-unit">kg CO₂e cumulative</p>
         </div>
         <div>
           <span class="banner-badge" id="dash-age-badge">—</span>
           <p class="banner-detail" id="dash-lifetime-breakdown">Log activity to see your breakdown</p>
         </div>
       </div>
+
+      <!-- CUMULATIVE METRICS -->
       <div class="metric-grid">
         <div class="mcard">
           <div class="mval" id="dash-gross" style="color:var(--red)">—</div>
-          <div class="munit" id="dash-period-unit">kg CO₂e / month</div>
-          <div class="mlabel">Emissions</div>
+          <div class="munit">kg CO₂e total</div>
+          <div class="mlabel">Total emitted</div>
         </div>
         <div class="mcard">
           <div class="mval" id="dash-offsets" style="color:var(--teal)">—</div>
           <div class="munit">kg CO₂e saved</div>
-          <div class="mlabel">Green actions</div>
+          <div class="mlabel">Total offset</div>
         </div>
         <div class="mcard">
           <div class="mval" id="dash-net">—</div>
           <div class="munit">kg CO₂e net</div>
-          <div class="mlabel">After offsets</div>
+          <div class="mlabel">Net total</div>
         </div>
         <div class="mcard">
-          <div class="mval" id="dash-trees" style="color:var(--blue)">—</div>
-          <div class="munit">trees needed</div>
-          <div class="mlabel">For neutrality</div>
+          <div class="mval" id="dash-logs" style="color:var(--blue)">—</div>
+          <div class="munit">entries logged</div>
+          <div class="mlabel">Total logs</div>
         </div>
       </div>
-      <div class="chart-row">
-        <div class="card">
-          <p class="sec-label">Emission categories</p>
-          <div class="chart-wrap"><canvas id="dash-donut" aria-label="Carbon by category"></canvas></div>
-        </div>
-        <div class="card">
-          <p class="sec-label">Emissions vs offsets</p>
-          <div class="chart-wrap"><canvas id="dash-bar" aria-label="Emissions vs offsets"></canvas></div>
+
+      <!-- TREND CHART -->
+      <div class="card" style="margin-bottom:.75rem">
+        <p class="sec-label">Your emissions trend over time</p>
+        <div id="trend-empty" style="display:flex;align-items:center;justify-content:center;height:160px;background:var(--surface2);border-radius:var(--rs);font-size:0.78rem;color:var(--text4)">Log activity to see your trend</div>
+        <div class="chart-wrap" id="trend-wrap" style="display:none"><canvas id="dash-trend" aria-label="Emissions trend over time"></canvas></div>
+      </div>
+
+      <!-- HISTORY TABLE -->
+      <div class="card" style="margin-bottom:.75rem">
+        <p class="sec-label">Full history</p>
+        <div id="history-empty" style="text-align:center;padding:2rem;color:var(--text4);font-size:0.82rem">No logs yet — start by logging your activity</div>
+        <div style="overflow-x:auto" id="history-wrap" style="display:none">
+          <table class="admin-table" id="history-table">
+            <thead><tr><th>Date</th><th>Period</th><th>Emissions</th><th>Offsets</th><th>Net</th><th>Status</th></tr></thead>
+            <tbody id="history-tbody"></tbody>
+          </table>
         </div>
       </div>
+
+      <!-- QUICK WINS -->
       <div class="card">
         <p class="sec-label">Quick wins for you</p>
         <div class="action-scroll" id="dash-actions">
@@ -1003,28 +1018,77 @@ function calculate() {
   showPage('results', document.getElementById('nav-results'));
 }
 
-function updateDashboard() {
-  if (!calcResult) return;
-  const r = calcResult;
-  document.getElementById('dash-gross').textContent = Math.round(r.gross);
-  document.getElementById('dash-offsets').textContent = Math.round(r.totalOffset);
-  const netEl = document.getElementById('dash-net');
-  netEl.textContent = Math.round(r.net);
-  netEl.style.color = r.net > 300 ? 'var(--red)' : r.net > 150 ? 'var(--amber)' : 'var(--teal)';
-  document.getElementById('dash-trees').textContent = r.trees;
-  document.getElementById('dash-lifetime').textContent = r.lifetime.totalTonnes;
-  document.getElementById('dash-age-badge').textContent = `Age ${currentUser.age} · ${r.lifetime.preYears} pre-tracking years`;
-  document.getElementById('dash-lifetime-breakdown').innerHTML = `Pre-tracking: ${(r.lifetime.preKg/1000).toFixed(2)} t<br>This month: ${Math.round(r.gross)} kg`;
-  const donutCtx = document.getElementById('dash-donut').getContext('2d');
-  if (charts.donut) charts.donut.destroy();
-  charts.donut = new Chart(donutCtx, {type:'doughnut', data:{labels:['Mobility','Home','Food','Lifestyle'], datasets:[{data:[Math.round(r.mob),Math.round(r.home),Math.round(r.food),Math.round(r.life)], backgroundColor:['#378ADD','#EF9F27','#1d9e75','#7F77DD'], borderWidth:0, hoverOffset:4}]}, options:{responsive:true, maintainAspectRatio:false, plugins:{legend:{position:'bottom', labels:{usePointStyle:true, padding:10, font:{size:11}}}}, cutout:'65%'}});
-  const barCtx = document.getElementById('dash-bar').getContext('2d');
-  if (charts.bar) charts.bar.destroy();
-  charts.bar = new Chart(barCtx, {type:'bar', data:{labels:['Emissions','Offsets'], datasets:[{data:[Math.round(r.gross), Math.round(r.totalOffset)], backgroundColor:['#E24B4A','#1d9e75'], borderRadius:8, borderWidth:0}]}, options:{responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{x:{grid:{display:false}, border:{display:false}}, y:{grid:{display:false}, border:{display:false}}}}});
-  const cats = [{cat:'mob',v:r.mob},{cat:'home',v:r.home},{cat:'food',v:r.food},{cat:'life',v:r.life}];
-  const biggest = cats.sort((a,b)=>b.v-a.v)[0].cat;
-  const relevant = ALL_ACTIONS.filter(a => a.cat === biggest || a.cat === 'off').slice(0,5);
-  document.getElementById('dash-actions').innerHTML = relevant.map(a => `<div class="ac" style="background:${a.bg}"><div class="ac-impact" style="color:${a.tc}">${a.impact}</div><div class="ac-text" style="color:${a.tc}">${a.text}</div></div>`).join('');
+function updateDashboard() { loadUserHistory(); }
+
+async function loadUserHistory() {
+  if (!currentUser.email) return;
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/ripple_logs?user_email=eq.${encodeURIComponent(currentUser.email)}&order=id.asc&select=*`, {
+      headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+    });
+    const logs = await res.json();
+    document.getElementById('dash-sub').textContent = logs && logs.length
+      ? `${logs.length} log${logs.length>1?'s':''} since you joined — here is your full carbon story`
+      : 'Log activity to start tracking your footprint';
+    if (!logs || !logs.length) return;
+    const totalGross   = logs.reduce((s,l) => s + (parseFloat(l.gross)||0), 0);
+    const totalOffsets = logs.reduce((s,l) => s + (parseFloat(l.offsets)||0), 0);
+    const totalNet     = logs.reduce((s,l) => s + (parseFloat(l.net)||0), 0);
+    document.getElementById('dash-total-gross').textContent = Math.round(totalGross);
+    document.getElementById('dash-gross').textContent   = Math.round(totalGross);
+    document.getElementById('dash-offsets').textContent = Math.round(totalOffsets);
+    const netEl = document.getElementById('dash-net');
+    netEl.textContent = Math.round(totalNet);
+    netEl.style.color = totalNet > 500 ? 'var(--red)' : totalNet > 200 ? 'var(--amber)' : 'var(--teal)';
+    document.getElementById('dash-logs').textContent = logs.length;
+    document.getElementById('dash-age-badge').textContent = `${currentUser.name} · joined Ripple`;
+    document.getElementById('dash-lifetime-breakdown').innerHTML =
+      `Total emitted: ${Math.round(totalGross)} kg &nbsp;·&nbsp; Total offset: ${Math.round(totalOffsets)} kg`;
+    document.getElementById('trend-empty').style.display = 'none';
+    document.getElementById('trend-wrap').style.display = 'block';
+    const trendCtx = document.getElementById('dash-trend').getContext('2d');
+    if (charts.trend) charts.trend.destroy();
+    charts.trend = new Chart(trendCtx, {
+      type:'line',
+      data:{
+        labels: logs.map((l,i) => l.date ? l.date.split(',')[0] : `Log ${i+1}`),
+        datasets:[
+          {label:'Emissions (kg)', data:logs.map(l=>parseFloat(l.gross)||0), borderColor:'#E24B4A', backgroundColor:'rgba(226,75,74,0.08)', borderWidth:2, pointRadius:4, tension:0.3, fill:true},
+          {label:'Net (kg)',       data:logs.map(l=>parseFloat(l.net)||0),   borderColor:'#1d9e75', backgroundColor:'rgba(29,158,117,0.08)', borderWidth:2, pointRadius:4, tension:0.3, fill:true},
+          {label:'Offsets (kg)',   data:logs.map(l=>parseFloat(l.offsets)||0), borderColor:'#5DCAA5', backgroundColor:'transparent', borderWidth:1.5, pointRadius:3, tension:0.3, borderDash:[4,3]}
+        ]
+      },
+      options:{responsive:true, maintainAspectRatio:false,
+        plugins:{legend:{position:'bottom', labels:{usePointStyle:true, padding:12, font:{size:11}}}},
+        scales:{
+          x:{grid:{display:false}, border:{display:false}, ticks:{font:{size:10}, maxRotation:45}},
+          y:{grid:{color:'rgba(0,0,0,0.04)'}, border:{display:false}, ticks:{font:{size:11}}}
+        }
+      }
+    });
+    document.getElementById('history-empty').style.display = 'none';
+    document.getElementById('history-wrap').style.removeProperty('display');
+    const reversed = [...logs].reverse();
+    document.getElementById('history-tbody').innerHTML = reversed.map(l => {
+      const net = parseFloat(l.net)||0;
+      const status = net < 100 ? '<span class="badge badge-green">Low</span>' : net < 250 ? '<span class="badge badge-amber">Medium</span>' : '<span class="badge badge-red">High</span>';
+      return `<tr>
+        <td style="color:var(--text2)">${l.date||'—'}</td>
+        <td style="color:var(--text3);text-transform:capitalize">${l.period||'—'}</td>
+        <td style="color:var(--red)">${Math.round(parseFloat(l.gross)||0)} kg</td>
+        <td style="color:var(--teal)">−${Math.round(parseFloat(l.offsets)||0)} kg</td>
+        <td style="font-weight:500">${Math.round(net)} kg</td>
+        <td>${status}</td>
+      </tr>`;
+    }).join('');
+    const last = logs[logs.length-1];
+    const cats = [{cat:'mob',v:parseFloat(last.mob)||0},{cat:'home',v:parseFloat(last.home)||0},{cat:'food',v:parseFloat(last.food)||0},{cat:'life',v:parseFloat(last.life)||0}].sort((a,b)=>b.v-a.v);
+    const topCats = cats.slice(0,2).map(c=>c.cat);
+    const actions = ALL_ACTIONS.filter(a => topCats.includes(a.cat) || a.cat==='off').slice(0,6);
+    document.getElementById('dash-actions').innerHTML = actions.map(a =>
+      `<div class="ac" style="background:${a.bg}"><div class="ac-impact" style="color:${a.tc}">${a.impact}</div><div class="ac-text" style="color:${a.tc}">${a.text}</div></div>`
+    ).join('');
+  } catch(e) { console.log('History load failed:', e); }
 }
 
 function renderResults() {
