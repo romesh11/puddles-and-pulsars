@@ -34,15 +34,15 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet"/>
 <style>
 :root{
-  --bg:#080c1a;
-  --surface:rgba(255,255,255,0.03);
-  --surface2:rgba(255,255,255,0.04);
-  --border:rgba(255,255,255,0.07);
-  --border2:rgba(255,255,255,0.08);
+  --bg:#2d1f0a;
+  --surface:rgba(255,255,255,0.05);
+  --surface2:rgba(255,255,255,0.06);
+  --border:rgba(255,255,255,0.09);
+  --border2:rgba(255,255,255,0.1);
   --text:#f1f5f9;
   --text2:#e2e8f0;
-  --text3:#94a3b8;
-  --text4:#64748b;
+  --text3:#c4a87a;
+  --text4:#a07850;
   --amber:#fbbf24;
   --amber-m:#d97706;
   --amber-d:#78350f;
@@ -63,114 +63,143 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 
 .page{position:relative;z-index:10;min-height:100vh;display:flex;flex-direction:column;}
 
-header{padding:clamp(1rem,3vw,1.25rem) clamp(1.25rem,4vw,2rem);border-bottom:.5px solid rgba(255,255,255,0.06);position:relative;z-index:10;}
+header{padding:clamp(1rem,3vw,1.25rem) clamp(1.25rem,4vw,2rem);border-bottom:.5px solid rgba(255,255,255,0.08);position:relative;z-index:10;}
 .logo{font-family:var(--serif);font-style:italic;font-size:.95rem;color:var(--text2);text-decoration:none;}
 .logo span{color:var(--accent);}
 
-.content{
+/* ── GRID ── */
+.grid{
   position:relative;z-index:10;
   display:grid;
-  grid-template-columns:260px 1fr;
-  gap:1.25rem;
+  grid-template-columns:repeat(3,1fr);
+  grid-template-rows:auto;
+  gap:clamp(.75rem,2vw,1rem);
   padding:clamp(1.25rem,3vw,1.5rem) clamp(1.25rem,4vw,2rem) clamp(2rem,5vw,3rem);
-  max-width:1100px;
+  align-items:start;
   width:100%;
 }
 
-/* ── LEFT ── */
-.left{display:flex;flex-direction:column;gap:1rem;}
+/* ── GRID PLACEMENT ── */
+.c-identity  {grid-column:1;grid-row:1/3;}
+.c-belief    {grid-column:1;grid-row:3;}
+.c-book      {grid-column:1;grid-row:4;}
+.c-interests {grid-column:1;grid-row:5;}
+.c-skills    {grid-column:2;grid-row:1;}
+.c-projects  {grid-column:2;grid-row:2/4;}
+.c-orgs      {grid-column:2;grid-row:4/6;}
+.c-edu       {grid-column:3;grid-row:1/3;}
+.c-marathon  {grid-column:3;grid-row:3/5;}
+.c-pnp       {grid-column:3;grid-row:5;}
 
-.id-card{background:var(--surface2);border:.5px solid var(--border2);border-radius:var(--r);padding:1.5rem;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);}
-.avatar{width:56px;height:56px;border-radius:50%;background:rgba(217,119,6,.15);border:.5px solid rgba(251,191,36,.3);display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-style:italic;font-size:1.2rem;color:var(--amber);margin-bottom:1rem;}
-.name{font-family:var(--serif);font-size:1.5rem;font-weight:400;color:var(--text);margin:0 0 .2rem;line-height:1.1;}
-.role{font-size:.72rem;color:var(--amber-m);letter-spacing:.07em;text-transform:uppercase;margin:0 0 .85rem;}
-.bio{font-size:.8rem;color:var(--text3);line-height:1.75;margin:0 0 1rem;}
-.divider{height:.5px;background:rgba(255,255,255,.06);margin:.85rem 0;}
-.connect-label{font-size:.58rem;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.2);margin-bottom:.6rem;}
-.pills{display:flex;flex-direction:column;gap:.4rem;}
-.pill{display:flex;align-items:center;gap:8px;padding:7px 10px;border:.5px solid var(--border2);border-radius:8px;font-size:.76rem;color:var(--text3);text-decoration:none;transition:border-color .2s,color .2s;background:rgba(255,255,255,.02);-webkit-tap-highlight-color:transparent;}
-.pill:hover{border-color:rgba(251,191,36,.3);color:var(--amber);}
-.pill svg{width:13px;height:13px;flex-shrink:0;opacity:.5;}
+/* ── BASE CARD ── */
+.card{background:var(--surface);border:.5px solid var(--border);border-radius:var(--r);padding:clamp(1rem,3vw,1.25rem) clamp(1rem,3vw,1.4rem);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);}
+.card-label{font-size:.58rem;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.28);margin-bottom:.85rem;}
+.divider{height:.5px;background:rgba(255,255,255,.08);margin:.85rem 0;}
 
-.belief-card{background:rgba(120,53,15,.2);border:.5px solid rgba(217,119,6,.25);border-radius:var(--r);padding:1.25rem 1.5rem;}
-.belief-label{font-size:.58rem;letter-spacing:.1em;text-transform:uppercase;color:var(--amber-m);margin-bottom:.6rem;opacity:.8;}
-.belief-text{font-family:var(--serif);font-size:1rem;font-style:italic;color:#fef3c7;line-height:1.5;}
+/* ── IDENTITY ── */
+.avatar{width:52px;height:52px;border-radius:50%;background:rgba(217,119,6,.2);border:.5px solid rgba(251,191,36,.35);display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-style:italic;font-size:1.1rem;color:var(--amber);margin-bottom:.85rem;}
+.name{font-family:var(--serif);font-size:clamp(1.2rem,3vw,1.4rem);font-weight:400;color:var(--text);margin:0 0 .15rem;line-height:1.1;}
+.role{font-size:.7rem;color:var(--amber-m);letter-spacing:.07em;text-transform:uppercase;margin:0 0 .75rem;}
+.bio{font-size:.8rem;color:var(--text3);line-height:1.75;margin:0;}
+.connect-label{font-size:.56rem;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.22);margin-bottom:.5rem;}
+.pills{display:flex;flex-direction:column;gap:.35rem;}
+.pill{display:flex;align-items:center;gap:7px;padding:6px 9px;border:.5px solid var(--border);border-radius:7px;font-size:.74rem;color:var(--text3);text-decoration:none;transition:border-color .2s,color .2s;background:rgba(255,255,255,.03);-webkit-tap-highlight-color:transparent;}
+.pill:hover{border-color:rgba(251,191,36,.35);color:var(--amber);}
+.pill svg{width:12px;height:12px;flex-shrink:0;opacity:.55;}
 
-.card{background:var(--surface);border:.5px solid var(--border);border-radius:var(--r);padding:1.25rem 1.4rem;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);}
-.card-label{font-size:.58rem;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.22);margin-bottom:.85rem;}
+/* ── BELIEF ── */
+.belief-card{background:rgba(120,53,15,.3);border:.5px solid rgba(217,119,6,.3);border-radius:var(--r);padding:clamp(1rem,3vw,1.25rem) clamp(1rem,3vw,1.4rem);}
+.belief-label{font-size:.56rem;letter-spacing:.1em;text-transform:uppercase;color:var(--amber-m);margin-bottom:.5rem;opacity:.8;}
+.belief-text{font-family:var(--serif);font-size:.95rem;font-style:italic;color:#fef3c7;line-height:1.5;}
 
-.book-inner{display:flex;align-items:center;gap:1rem;}
-.book-cover{width:44px;height:60px;background:linear-gradient(135deg,#1e1b4b,#4c1d95);border-radius:4px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:.55rem;color:#c4b5fd;text-align:center;padding:4px;line-height:1.3;}
-.book-title{font-family:var(--serif);font-size:.95rem;font-style:italic;color:var(--text2);margin:0 0 2px;}
-.book-author{font-size:.72rem;color:var(--text4);margin:0 0 6px;}
-.book-status{display:inline-flex;align-items:center;gap:4px;background:rgba(29,158,117,.1);border:.5px solid rgba(29,158,117,.2);border-radius:20px;padding:2px 8px;font-size:.62rem;color:var(--teal);}
+/* ── BOOK ── */
+.book-inner{display:flex;align-items:center;gap:.85rem;}
+.book-cover{width:38px;height:52px;background:linear-gradient(135deg,#1e1b4b,#4c1d95);border-radius:4px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:.45rem;color:#c4b5fd;text-align:center;padding:3px;line-height:1.3;}
+.book-title{font-family:var(--serif);font-size:.88rem;font-style:italic;color:var(--text2);margin:0 0 2px;}
+.book-author{font-size:.7rem;color:var(--text4);margin:0 0 5px;}
+.book-status{display:inline-flex;align-items:center;gap:3px;background:rgba(29,158,117,.12);border:.5px solid rgba(29,158,117,.22);border-radius:20px;padding:2px 7px;font-size:.6rem;color:var(--teal);}
 
-.interest-wrap{display:flex;flex-wrap:wrap;gap:.5rem;}
-.interest-tag{background:rgba(255,255,255,.04);border:.5px solid var(--border2);border-radius:20px;padding:4px 12px;font-size:.72rem;color:var(--text3);}
+/* ── INTERESTS ── */
+.interest-wrap{display:flex;flex-wrap:wrap;gap:.4rem;}
+.interest-tag{background:rgba(255,255,255,.05);border:.5px solid var(--border);border-radius:20px;padding:3px 10px;font-size:.7rem;color:var(--text3);}
 
-/* ── RIGHT ── */
-.right{display:flex;flex-direction:column;gap:1rem;}
+/* ── SKILLS ── */
+.skill-wrap{display:flex;flex-wrap:wrap;gap:.4rem;}
+.skill-tag{background:rgba(217,119,6,.15);border:.5px solid rgba(217,119,6,.28);border-radius:20px;padding:3px 10px;font-size:.7rem;color:var(--amber);}
 
-.skill-wrap{display:flex;flex-wrap:wrap;gap:.5rem;}
-.skill-tag{background:rgba(217,119,6,.1);border:.5px solid rgba(217,119,6,.2);border-radius:20px;padding:4px 12px;font-size:.72rem;color:var(--amber-m);}
-
-.work-item{padding:.7rem 0;border-bottom:.5px solid rgba(255,255,255,.05);}
+/* ── PROJECTS ── */
+.work-item{padding:.65rem 0;border-bottom:.5px solid rgba(255,255,255,.07);}
 .work-item:last-child{border-bottom:none;padding-bottom:0;}
-.work-title{font-size:.85rem;font-weight:500;color:var(--text2);margin:0 0 .2rem;}
-.work-desc{font-size:.76rem;color:var(--text4);line-height:1.6;margin:0;}
+.work-title{font-size:.83rem;font-weight:500;color:var(--text2);margin:0 0 .18rem;}
+.work-desc{font-size:.74rem;color:var(--text4);line-height:1.65;margin:0;}
 
-/* ── ORGS ── */
-.org-list{display:flex;flex-direction:column;gap:.6rem;}
-.org{display:flex;align-items:center;gap:.85rem;background:var(--surface);border:.5px solid var(--border);border-radius:12px;padding:.85rem 1rem;text-decoration:none;transition:border-color .2s;-webkit-tap-highlight-color:transparent;}
-.org:hover{border-color:rgba(251,191,36,.2);}
-.org.current{background:rgba(217,119,6,.08);border:.5px solid rgba(217,119,6,.3);}
-.org-dot{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:600;flex-shrink:0;}
+/* ── ORGANISATIONS ── */
+.org-list{display:flex;flex-direction:column;gap:.5rem;}
+.org{display:flex;align-items:center;gap:.75rem;background:rgba(255,255,255,.03);border:.5px solid var(--border);border-radius:10px;padding:.7rem .85rem;text-decoration:none;transition:border-color .2s;-webkit-tap-highlight-color:transparent;}
+.org:hover{border-color:rgba(251,191,36,.25);}
+.org.current{background:rgba(217,119,6,.12);border:.5px solid rgba(217,119,6,.38);}
+.org-dot{width:32px;height:32px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:600;flex-shrink:0;}
 .org-info{flex:1;min-width:0;}
-.org-name{font-size:.82rem;font-weight:500;color:var(--text2);margin:0 0 1px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
-.current-badge{background:rgba(217,119,6,.2);color:var(--amber);font-size:.58rem;padding:1px 7px;border-radius:20px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;border:.5px solid rgba(251,191,36,.3);flex-shrink:0;}
-.org-role{font-size:.7rem;color:var(--text4);margin:0;}
-.org-arrow{font-size:.75rem;color:var(--amber-m);opacity:.5;flex-shrink:0;}
+.org-name{font-size:.78rem;font-weight:500;color:var(--text2);margin:0 0 1px;display:flex;align-items:center;gap:5px;flex-wrap:wrap;}
+.current-badge{background:rgba(217,119,6,.22);color:var(--amber);font-size:.55rem;padding:1px 6px;border-radius:20px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;border:.5px solid rgba(251,191,36,.35);flex-shrink:0;}
+.org-role{font-size:.68rem;color:var(--text4);margin:0;}
+.org-arrow{font-size:.72rem;color:var(--amber-m);opacity:.55;flex-shrink:0;}
 
 /* ── EDUCATION ── */
-.edu-item{display:flex;align-items:flex-start;gap:.75rem;padding:.65rem 0;border-bottom:.5px solid rgba(255,255,255,.05);}
+.edu-item{display:flex;align-items:flex-start;gap:.65rem;padding:.6rem 0;border-bottom:.5px solid rgba(255,255,255,.07);}
 .edu-item:last-child{border-bottom:none;padding-bottom:0;}
-.edu-dot{width:6px;height:6px;border-radius:50%;background:var(--amber-m);margin-top:6px;flex-shrink:0;opacity:.7;}
-.edu-title{font-size:.82rem;font-weight:500;color:var(--text2);margin:0 0 1px;}
-.edu-sub{font-size:.72rem;color:var(--text4);margin:0;}
+.edu-dot{width:5px;height:5px;border-radius:50%;background:var(--amber-m);margin-top:6px;flex-shrink:0;opacity:.75;}
+.edu-title{font-size:.8rem;font-weight:500;color:var(--text2);margin:0 0 1px;}
+.edu-sub{font-size:.7rem;color:var(--text4);margin:0;}
 
 /* ── MARATHONS ── */
 .marathon-list{display:flex;flex-direction:column;}
-.marathon{display:flex;align-items:center;gap:.85rem;padding:.8rem 0;border-bottom:.5px solid rgba(255,255,255,.05);}
+.marathon{display:flex;align-items:center;gap:.75rem;padding:.75rem 0;border-bottom:.5px solid rgba(255,255,255,.07);}
 .marathon:last-child{border-bottom:none;padding-bottom:0;}
-.m-rank{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:600;flex-shrink:0;}
-.r1{background:rgba(251,191,36,.15);color:var(--amber);border:.5px solid rgba(251,191,36,.3);}
-.r2{background:rgba(148,163,184,.12);color:#94a3b8;border:.5px solid rgba(148,163,184,.25);}
-.r3{background:rgba(180,119,74,.12);color:#b4774a;border:.5px solid rgba(180,119,74,.25);}
+.m-rank{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:600;flex-shrink:0;}
+.r1{background:rgba(251,191,36,.18);color:var(--amber);border:.5px solid rgba(251,191,36,.35);}
+.r2{background:rgba(148,163,184,.12);color:#94a3b8;border:.5px solid rgba(148,163,184,.28);}
+.r3{background:rgba(180,119,74,.12);color:#b4774a;border:.5px solid rgba(180,119,74,.28);}
 .m-info{flex:1;}
-.m-name{font-size:.82rem;font-weight:500;color:var(--text2);margin:0 0 1px;}
-.m-year{font-size:.7rem;color:var(--text4);margin:0;}
-.m-time{font-family:var(--serif);font-size:1rem;color:var(--amber);}
-.m-bar-wrap{width:60px;height:3px;background:rgba(255,255,255,.06);border-radius:2px;overflow:hidden;}
+.m-name{font-size:.8rem;font-weight:500;color:var(--text2);margin:0 0 1px;}
+.m-year{font-size:.68rem;color:var(--text4);margin:0;}
+.m-time{font-family:var(--serif);font-size:.95rem;color:var(--amber);}
+.m-bar-wrap{width:48px;height:2px;background:rgba(255,255,255,.1);border-radius:2px;overflow:hidden;}
 .m-bar{height:100%;border-radius:2px;background:linear-gradient(to right,#fbbf24,#d97706);}
-.improving{display:inline-flex;align-items:center;gap:4px;background:rgba(29,158,117,.12);border:.5px solid rgba(29,158,117,.2);border-radius:20px;padding:3px 10px;font-size:.62rem;color:var(--teal);margin-top:.75rem;}
+.improving{display:inline-flex;align-items:center;gap:4px;background:rgba(29,158,117,.12);border:.5px solid rgba(29,158,117,.22);border-radius:20px;padding:3px 9px;font-size:.6rem;color:var(--teal);margin-top:.65rem;}
 
-/* ── PNP TEASER ── */
-.pnp-card{background:rgba(76,29,149,.12);border:.5px solid rgba(167,139,250,.18);border-radius:var(--r);padding:1.25rem 1.4rem;}
-.pnp-label{font-size:.58rem;letter-spacing:.1em;text-transform:uppercase;color:rgba(167,139,250,.5);margin-bottom:.85rem;}
-.pnp-title{font-family:var(--serif);font-size:1.1rem;font-style:italic;color:var(--text2);margin:0 0 .4rem;}
-.pnp-desc{font-size:.78rem;color:var(--text4);line-height:1.65;margin:0 0 1rem;}
-.pnp-tiles{display:flex;gap:.6rem;flex-wrap:wrap;}
-.pnp-tile{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.04);border:.5px solid rgba(255,255,255,.08);border-radius:10px;padding:.6rem .9rem;text-decoration:none;transition:background .2s,border-color .2s;-webkit-tap-highlight-color:transparent;}
-.pnp-tile:hover{background:rgba(255,255,255,.07);border-color:rgba(167,139,250,.3);}
-.pnp-tile-label{font-size:.75rem;color:var(--text3);}
-.pnp-tile-tag{font-size:.6rem;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);}
+/* ── PNP ── */
+.pnp-card{background:rgba(76,29,149,.18);border:.5px solid rgba(167,139,250,.22);border-radius:var(--r);padding:clamp(1rem,3vw,1.25rem) clamp(1rem,3vw,1.4rem);}
+.pnp-label{font-size:.56rem;letter-spacing:.1em;text-transform:uppercase;color:rgba(167,139,250,.55);margin-bottom:.65rem;}
+.pnp-title{font-family:var(--serif);font-size:1rem;font-style:italic;color:var(--text2);margin:0 0 .35rem;}
+.pnp-desc{font-size:.74rem;color:var(--text4);line-height:1.65;margin:0 0 .85rem;}
+.pnp-tiles{display:flex;gap:.4rem;flex-wrap:wrap;}
+.pnp-tile{display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.05);border:.5px solid rgba(255,255,255,.09);border-radius:8px;padding:.45rem .7rem;text-decoration:none;transition:background .2s,border-color .2s;-webkit-tap-highlight-color:transparent;}
+.pnp-tile:hover{background:rgba(255,255,255,.08);border-color:rgba(167,139,250,.3);}
+.pnp-tile-label{font-size:.7rem;color:var(--text3);}
+.pnp-tile-tag{font-size:.58rem;letter-spacing:.07em;text-transform:uppercase;color:var(--accent);}
 
-footer{position:relative;z-index:10;padding:clamp(1rem,3vw,1.5rem) clamp(1.25rem,4vw,2rem);color:#1e293b;font-size:.75rem;}
+footer{position:relative;z-index:10;padding:clamp(1rem,3vw,1.5rem) clamp(1.25rem,4vw,2rem);color:rgba(255,255,255,.1);font-size:.75rem;}
 
 /* ── RESPONSIVE ── */
-@media(max-width:768px){
-  .content{grid-template-columns:1fr;}
-  .left,.right{gap:.85rem;}
+@media(max-width:900px){
+  .grid{grid-template-columns:repeat(2,1fr);}
+  .c-identity{grid-column:1;grid-row:1/3;}
+  .c-belief{grid-column:1;grid-row:3;}
+  .c-book{grid-column:1;grid-row:4;}
+  .c-interests{grid-column:1;grid-row:5;}
+  .c-skills{grid-column:2;grid-row:1;}
+  .c-projects{grid-column:2;grid-row:2/4;}
+  .c-orgs{grid-column:1;grid-row:6/8;}
+  .c-edu{grid-column:2;grid-row:4/6;}
+  .c-marathon{grid-column:2;grid-row:6/8;}
+  .c-pnp{grid-column:1;grid-row:8;}
+}
+@media(max-width:580px){
+  .grid{grid-template-columns:1fr;}
+  .c-identity,.c-belief,.c-book,.c-interests,
+  .c-skills,.c-projects,.c-orgs,.c-edu,
+  .c-marathon,.c-pnp{grid-column:1;grid-row:auto;}
 }
 @media(prefers-reduced-motion:reduce){
   .pill,.org,.pnp-tile{transition:none;}
@@ -183,33 +212,35 @@ footer{position:relative;z-index:10;padding:clamp(1rem,3vw,1.5rem) clamp(1.25rem
 
 <svg class="bg-canvas" viewBox="0 0 700 900" preserveAspectRatio="xMidYMid slice"
      xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
-  <circle cx="45"  cy="28"  r="0.8" fill="#fff" opacity="0.3"/>
-  <circle cx="198" cy="18"  r="0.7" fill="#fff" opacity="0.35"/>
-  <circle cx="428" cy="14"  r="0.9" fill="#fff" opacity="0.3"/>
-  <circle cx="598" cy="28"  r="0.6" fill="#fff" opacity="0.25"/>
-  <circle cx="658" cy="55"  r="0.5" fill="#fff" opacity="0.2"/>
-  <circle cx="88"  cy="80"  r="0.5" fill="#fff" opacity="0.2"/>
-  <circle cx="368" cy="95"  r="0.7" fill="#fff" opacity="0.25"/>
-  <circle cx="550" cy="180" r="0.5" fill="#c4b5fd" opacity="0.18"/>
-  <circle cx="140" cy="220" r="0.4" fill="#fff"    opacity="0.15"/>
-  <circle cx="680" cy="280" r="0.4" fill="#fff"    opacity="0.15"/>
-  <circle cx="320" cy="380" r="0.5" fill="#c4b5fd" opacity="0.12"/>
-  <circle cx="80"  cy="460" r="0.4" fill="#fff"    opacity="0.1"/>
-  <circle cx="600" cy="520" r="0.4" fill="#c4b5fd" opacity="0.09"/>
-  <circle cx="420" cy="660" r="0.5" fill="#fff"    opacity="0.08"/>
-  <circle cx="200" cy="740" r="0.4" fill="#fff"    opacity="0.08"/>
-  <circle cx="560" cy="800" r="0.4" fill="#c4b5fd" opacity="0.07"/>
-  <!-- purple nebula — background depth only -->
-  <ellipse cx="60"  cy="480" rx="120" ry="80" fill="#1e1b4b" opacity="0.1"/>
-  <ellipse cx="660" cy="680" rx="100" ry="60" fill="#2e1065" opacity="0.07"/>
+  <circle cx="45"  cy="28"  r="0.8" fill="#fff" opacity="0.22"/>
+  <circle cx="198" cy="18"  r="0.7" fill="#fff" opacity="0.28"/>
+  <circle cx="428" cy="14"  r="0.9" fill="#fff" opacity="0.22"/>
+  <circle cx="598" cy="28"  r="0.6" fill="#fff" opacity="0.18"/>
+  <circle cx="658" cy="55"  r="0.5" fill="#fff" opacity="0.15"/>
+  <circle cx="88"  cy="80"  r="0.5" fill="#fff" opacity="0.15"/>
+  <circle cx="368" cy="95"  r="0.7" fill="#fff" opacity="0.2"/>
+  <circle cx="550" cy="170" r="0.5" fill="#fbbf24" opacity="0.14"/>
+  <circle cx="140" cy="210" r="0.4" fill="#fff"    opacity="0.12"/>
+  <circle cx="680" cy="270" r="0.4" fill="#fff"    opacity="0.12"/>
+  <circle cx="320" cy="370" r="0.5" fill="#fbbf24" opacity="0.1"/>
+  <circle cx="80"  cy="450" r="0.4" fill="#fff"    opacity="0.09"/>
+  <circle cx="600" cy="510" r="0.4" fill="#fbbf24" opacity="0.08"/>
+  <circle cx="420" cy="650" r="0.5" fill="#fff"    opacity="0.07"/>
+  <circle cx="200" cy="730" r="0.4" fill="#fff"    opacity="0.07"/>
+  <circle cx="560" cy="790" r="0.4" fill="#fbbf24" opacity="0.06"/>
+  <!-- warm amber nebula clouds -->
+  <ellipse cx="60"  cy="480" rx="110" ry="70" fill="#78350f" opacity="0.08"/>
+  <ellipse cx="650" cy="660" rx="90"  ry="55" fill="#92400e" opacity="0.06"/>
+  <!-- purple nebula — subtle background depth -->
+  <ellipse cx="680" cy="200" rx="80"  ry="50" fill="#1e1b4b" opacity="0.08"/>
   <!-- warm amber star — identity of this page -->
-  <ellipse cx="630" cy="55" rx="42" ry="26" fill="#1a1205" opacity="0.8"/>
-  <circle  cx="632" cy="55" r="15"  fill="#1a120a" opacity="0.9"/>
-  <circle  cx="632" cy="55" r="9"   fill="#2d1f0e" opacity="0.95"/>
-  <circle  cx="632" cy="55" r="5.5" fill="#78350f" opacity="0.9"/>
-  <circle  cx="632" cy="55" r="3"   fill="#d97706" opacity="0.95"/>
-  <circle  cx="632" cy="55" r="1.5" fill="#fbbf24"/>
-  <circle  cx="632" cy="55" r="0.8" fill="#fef3c7"/>
+  <ellipse cx="632" cy="52" rx="40" ry="24" fill="#1a1205" opacity="0.85"/>
+  <circle  cx="634" cy="52" r="14"  fill="#1a120a" opacity="0.9"/>
+  <circle  cx="634" cy="52" r="8"   fill="#2d1f0e" opacity="0.95"/>
+  <circle  cx="634" cy="52" r="5"   fill="#78350f" opacity="0.9"/>
+  <circle  cx="634" cy="52" r="2.8" fill="#d97706" opacity="0.95"/>
+  <circle  cx="634" cy="52" r="1.4" fill="#fbbf24"/>
+  <circle  cx="634" cy="52" r="0.7" fill="#fef3c7"/>
 </svg>
 
 <div class="page">
@@ -218,249 +249,200 @@ footer{position:relative;z-index:10;padding:clamp(1rem,3vw,1.5rem) clamp(1.25rem
   </header>
 
   <main id="main">
-    <div class="content">
+    <div class="grid">
 
-      <!-- ── LEFT COLUMN ── -->
-      <div class="left">
-
-        <!-- Identity -->
-        <div class="id-card">
-          <div class="avatar" aria-hidden="true">RA</div>
-          <h1 class="name">Romesh Atre</h1>
-          <p class="role">Solid Waste Management · Social Sector</p>
-          <p class="bio">Caught between two worlds — the pull of urban progress and the wisdom of rural values. Trying to make a difference somewhere in between.</p>
-          <div class="divider"></div>
-          <p class="connect-label">Connect</p>
-          <nav class="pills" aria-label="Social links">
-            <a href="#" class="pill">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 7 10-7"/></svg>
-              Email
-            </a>
-            <a href="#" class="pill">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-4 0v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
-              LinkedIn
-            </a>
-            <a href="#" class="pill">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
-              Instagram
-            </a>
-          </nav>
-        </div>
-
-        <!-- Belief -->
-        <div class="belief-card">
-          <p class="belief-label">A belief I carry</p>
-          <p class="belief-text">Nature comes first.<br/>Everything else follows.</p>
-        </div>
-
-        <!-- Currently reading -->
-        <div class="card">
-          <p class="card-label">Currently reading</p>
-          <div class="book-inner">
-            <div class="book-cover" aria-hidden="true">Kafka on the Shore</div>
-            <div>
-              <p class="book-title">Kafka on the Shore</p>
-              <p class="book-author">Haruki Murakami</p>
-              <span class="book-status">● Reading now</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Interests -->
-        <div class="card">
-          <p class="card-label">Interests & passions</p>
-          <div class="interest-wrap">
-            <span class="interest-tag">Team sports</span>
-            <span class="interest-tag">Hiking & trekking</span>
-            <span class="interest-tag">Biking</span>
-            <span class="interest-tag">Intense conversations</span>
-            <span class="interest-tag">Running</span>
-          </div>
-        </div>
-
+      <!-- COL 1 ROW 1-2: Identity -->
+      <div class="card c-identity">
+        <div class="avatar" aria-hidden="true">RA</div>
+        <h1 class="name">Romesh Atre</h1>
+        <p class="role">Solid Waste Management · Social Sector</p>
+        <p class="bio">Caught between two worlds — the pull of urban progress and the wisdom of rural values. Trying to make a difference somewhere in between.</p>
+        <div class="divider"></div>
+        <p class="connect-label">Connect</p>
+        <nav class="pills" aria-label="Social links">
+          <a href="#" class="pill">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 7 10-7"/></svg>Email
+          </a>
+          <a href="#" class="pill">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-4 0v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>LinkedIn
+          </a>
+          <a href="#" class="pill">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>Instagram
+          </a>
+        </nav>
       </div>
 
-      <!-- ── RIGHT COLUMN ── -->
-      <div class="right">
-
-        <!-- Skills -->
-        <div class="card">
-          <p class="card-label">Skills & expertise</p>
-          <div class="skill-wrap">
-            <span class="skill-tag">Project management</span>
-            <span class="skill-tag">Waste systems design</span>
-            <span class="skill-tag">Value chain</span>
-            <span class="skill-tag">Community outreach</span>
-          </div>
-        </div>
-
-        <!-- Current projects -->
-        <div class="card">
-          <p class="card-label">Current projects</p>
-          <div class="work-item">
-            <p class="work-title">SWM for Farmhouses & Nagar Parishads</p>
-            <p class="work-desc">Developing a structured solid waste management framework for privately owned farmhouses and Nagar Parishads — bridging informal waste practices and sustainable systems.</p>
-          </div>
-          <div class="work-item">
-            <p class="work-title">Puddles & Pulsars</p>
-            <p class="work-desc">Building eco games, a carbon tracker and writing a book — one thought at a time.</p>
-          </div>
-        </div>
-
-        <!-- Organisations -->
-        <div class="card">
-          <p class="card-label">Organisations</p>
-          <div class="org-list">
-
-            <a href="https://www.projectaamhi.com" class="org current" target="_blank" rel="noopener">
-              <div class="org-dot" style="background:rgba(217,119,6,.2);color:#fbbf24;" aria-hidden="true">AS</div>
-              <div class="org-info">
-                <p class="org-name">Aamhi Swaach Charitable Foundation <span class="current-badge">Current</span></p>
-                <p class="org-role">Consultant · projectaamhi.com</p>
-              </div>
-              <span class="org-arrow" aria-hidden="true">↗</span>
-            </a>
-
-            <a href="#" class="org">
-              <div class="org-dot" style="background:rgba(29,158,117,.15);color:#1d9e75;" aria-hidden="true">O2</div>
-              <div class="org-info">
-                <p class="org-name">Organisation 2</p>
-                <p class="org-role">Your role</p>
-              </div>
-              <span class="org-arrow" aria-hidden="true">↗</span>
-            </a>
-
-            <a href="#" class="org">
-              <div class="org-dot" style="background:rgba(56,189,248,.12);color:#38bdf8;" aria-hidden="true">O3</div>
-              <div class="org-info">
-                <p class="org-name">Organisation 3</p>
-                <p class="org-role">Your role</p>
-              </div>
-              <span class="org-arrow" aria-hidden="true">↗</span>
-            </a>
-
-            <a href="#" class="org">
-              <div class="org-dot" style="background:rgba(167,139,250,.12);color:#a78bfa;" aria-hidden="true">O4</div>
-              <div class="org-info">
-                <p class="org-name">Organisation 4</p>
-                <p class="org-role">Your role</p>
-              </div>
-              <span class="org-arrow" aria-hidden="true">↗</span>
-            </a>
-
-          </div>
-        </div>
-
-        <!-- Education -->
-        <div class="card">
-          <p class="card-label">Education & certifications</p>
-          <div class="edu-item">
-            <div class="edu-dot" aria-hidden="true"></div>
-            <div><p class="edu-title">BBM IB</p><p class="edu-sub">Business Management</p></div>
-          </div>
-          <div class="edu-item">
-            <div class="edu-dot" aria-hidden="true"></div>
-            <div><p class="edu-title">Diploma in Civil Engineering</p><p class="edu-sub">Technical qualification</p></div>
-          </div>
-          <div class="edu-item">
-            <div class="edu-dot" aria-hidden="true"></div>
-            <div><p class="edu-title">Quality Control Certification</p><p class="edu-sub">Civil practices</p></div>
-          </div>
-          <div class="edu-item">
-            <div class="edu-dot" aria-hidden="true"></div>
-            <div><p class="edu-title">Modi Script</p><p class="edu-sub">Certificate course · ancient Marathi script</p></div>
-          </div>
-          <div class="edu-item">
-            <div class="edu-dot" aria-hidden="true"></div>
-            <div><p class="edu-title">SSC</p><p class="edu-sub">10th standard</p></div>
-          </div>
-        </div>
-
-        <!-- Marathons -->
-        <div class="card">
-          <p class="card-label">Marathons</p>
-          <div class="marathon-list">
-            <div class="marathon">
-              <div class="m-rank r1" aria-label="1st">1</div>
-              <div class="m-info">
-                <p class="m-name">TMM 2026</p>
-                <p class="m-year">Tata Mumbai Marathon</p>
-              </div>
-              <div class="m-bar-wrap" aria-hidden="true"><div class="m-bar" style="width:100%"></div></div>
-              <span class="m-time">3:53:50</span>
-            </div>
-            <div class="marathon">
-              <div class="m-rank r2" aria-label="2nd">2</div>
-              <div class="m-info">
-                <p class="m-name">TMM 2025</p>
-                <p class="m-year">Tata Mumbai Marathon</p>
-              </div>
-              <div class="m-bar-wrap" aria-hidden="true"><div class="m-bar" style="width:82%"></div></div>
-              <span class="m-time">3:59:30</span>
-            </div>
-            <div class="marathon">
-              <div class="m-rank r3" aria-label="3rd">3</div>
-              <div class="m-info">
-                <p class="m-name">TMM 2024</p>
-                <p class="m-year">Tata Mumbai Marathon</p>
-              </div>
-              <div class="m-bar-wrap" aria-hidden="true"><div class="m-bar" style="width:55%"></div></div>
-              <span class="m-time">4:59:30</span>
-            </div>
-          </div>
-          <div class="improving" aria-label="Improving trend">↑ Improving every year — 1:05:40 faster since 2024</div>
-        </div>
-
-        <!-- Puddles & Pulsars teaser -->
-        <div class="pnp-card">
-          <p class="pnp-label">A side project that became a universe</p>
-          <h2 class="pnp-title">Puddles & Pulsars</h2>
-          <p class="pnp-desc">A small corner of the internet where sustainability meets play — a waste segregation game, a carbon tracker called Ripple, and a book being written one thought at a time from somewhere between a city left behind and a coast that asked nothing.</p>
-          <div class="pnp-tiles">
-
-            <a href="/game" class="pnp-tile" aria-label="Play the Waste Segregation game">
-              <svg width="22" height="22" viewBox="0 0 52 52" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                <rect x="11" y="18" width="30" height="26" rx="3" fill="#14532d" stroke="#16a34a" stroke-width="0.8"/>
-                <rect x="8"  y="13" width="36" height="6"  rx="2" fill="#16a34a" stroke="#4ade80" stroke-width="0.6"/>
-                <rect x="20" y="10" width="12" height="4"  rx="2" fill="#22c55e" stroke="#4ade80" stroke-width="0.5"/>
-              </svg>
-              <div>
-                <div class="pnp-tile-label">Waste Game</div>
-                <div class="pnp-tile-tag">Play →</div>
-              </div>
-            </a>
-
-            <a href="/ripple" class="pnp-tile" aria-label="Open Ripple carbon calculator">
-              <svg width="22" height="22" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                <circle cx="16" cy="16" r="3"  fill="#0f6e56"/>
-                <circle cx="16" cy="16" r="7"  fill="none" stroke="#1d9e75" stroke-width="1.3" opacity="0.75"/>
-                <circle cx="16" cy="16" r="11" fill="none" stroke="#5DCAA5" stroke-width="0.9" opacity="0.5"/>
-                <circle cx="16" cy="16" r="15" fill="none" stroke="#9FE1CB" stroke-width="0.5" opacity="0.3"/>
-              </svg>
-              <div>
-                <div class="pnp-tile-label">Ripple</div>
-                <div class="pnp-tile-tag">Calculate →</div>
-              </div>
-            </a>
-
-            <a href="/book" class="pnp-tile" aria-label="Read the book">
-              <svg width="22" height="22" viewBox="0 0 52 52" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                <path d="M10 8 Q10 6 12 6 L28 6 L38 16 L38 42 Q38 44 36 44 L12 44 Q10 44 10 42 Z" fill="#1e1b4b" stroke="#4338ca" stroke-width="0.8"/>
-                <path d="M28 6 L28 16 L38 16" fill="#2d2b72" stroke="#4338ca" stroke-width="0.8"/>
-                <line x1="16" y1="23" x2="32" y2="23" stroke="#818cf8" stroke-width="1" stroke-linecap="round" opacity="0.8"/>
-                <line x1="16" y1="28" x2="32" y2="28" stroke="#818cf8" stroke-width="1" stroke-linecap="round" opacity="0.6"/>
-                <line x1="16" y1="33" x2="26" y2="33" stroke="#818cf8" stroke-width="1" stroke-linecap="round" opacity="0.4"/>
-              </svg>
-              <div>
-                <div class="pnp-tile-label">The Book</div>
-                <div class="pnp-tile-tag">Read →</div>
-              </div>
-            </a>
-
-          </div>
-        </div>
-
+      <!-- COL 1 ROW 3: Belief -->
+      <div class="belief-card c-belief">
+        <p class="belief-label">A belief I carry</p>
+        <p class="belief-text">Nature comes first.<br/>Everything else follows.</p>
       </div>
+
+      <!-- COL 1 ROW 4: Book -->
+      <div class="card c-book">
+        <p class="card-label">Currently reading</p>
+        <div class="book-inner">
+          <div class="book-cover" aria-hidden="true">Kafka on the Shore</div>
+          <div>
+            <p class="book-title">Kafka on the Shore</p>
+            <p class="book-author">Haruki Murakami</p>
+            <span class="book-status">● Reading now</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- COL 1 ROW 5: Interests -->
+      <div class="card c-interests">
+        <p class="card-label">Interests & passions</p>
+        <div class="interest-wrap">
+          <span class="interest-tag">Team sports</span>
+          <span class="interest-tag">Hiking & trekking</span>
+          <span class="interest-tag">Biking</span>
+          <span class="interest-tag">Intense conversations</span>
+          <span class="interest-tag">Running</span>
+        </div>
+      </div>
+
+      <!-- COL 2 ROW 1: Skills -->
+      <div class="card c-skills">
+        <p class="card-label">Skills & expertise</p>
+        <div class="skill-wrap">
+          <span class="skill-tag">Project management</span>
+          <span class="skill-tag">Waste systems design</span>
+          <span class="skill-tag">Value chain</span>
+          <span class="skill-tag">Community outreach</span>
+        </div>
+      </div>
+
+      <!-- COL 2 ROW 2-3: Projects -->
+      <div class="card c-projects">
+        <p class="card-label">Current projects</p>
+        <div class="work-item">
+          <p class="work-title">SWM for Farmhouses & Nagar Parishads</p>
+          <p class="work-desc">Developing a structured solid waste management framework for privately owned farmhouses and Nagar Parishads — bridging informal waste practices and sustainable systems.</p>
+        </div>
+        <div class="work-item">
+          <p class="work-title">Puddles & Pulsars</p>
+          <p class="work-desc">Building eco games, a carbon tracker and writing a book — one thought at a time.</p>
+        </div>
+      </div>
+
+      <!-- COL 2 ROW 4-5: Organisations -->
+      <div class="card c-orgs">
+        <p class="card-label">Organisations</p>
+        <div class="org-list">
+          <a href="https://www.projectaamhi.com" class="org current" target="_blank" rel="noopener" aria-label="Aamhi Swaach Charitable Foundation — current organisation">
+            <div class="org-dot" style="background:rgba(217,119,6,.22);color:#fbbf24;" aria-hidden="true">AS</div>
+            <div class="org-info">
+              <p class="org-name">Aamhi Swaach Charitable Foundation <span class="current-badge">Current</span></p>
+              <p class="org-role">Consultant · projectaamhi.com</p>
+            </div>
+            <span class="org-arrow" aria-hidden="true">↗</span>
+          </a>
+          <a href="#" class="org">
+            <div class="org-dot" style="background:rgba(29,158,117,.18);color:#1d9e75;" aria-hidden="true">O2</div>
+            <div class="org-info"><p class="org-name">Organisation 2</p><p class="org-role">Your role</p></div>
+            <span class="org-arrow" aria-hidden="true">↗</span>
+          </a>
+          <a href="#" class="org">
+            <div class="org-dot" style="background:rgba(56,189,248,.14);color:#38bdf8;" aria-hidden="true">O3</div>
+            <div class="org-info"><p class="org-name">Organisation 3</p><p class="org-role">Your role</p></div>
+            <span class="org-arrow" aria-hidden="true">↗</span>
+          </a>
+          <a href="#" class="org">
+            <div class="org-dot" style="background:rgba(167,139,250,.14);color:#a78bfa;" aria-hidden="true">O4</div>
+            <div class="org-info"><p class="org-name">Organisation 4</p><p class="org-role">Your role</p></div>
+            <span class="org-arrow" aria-hidden="true">↗</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- COL 3 ROW 1-2: Education -->
+      <div class="card c-edu">
+        <p class="card-label">Education & certifications</p>
+        <div class="edu-item">
+          <div class="edu-dot" aria-hidden="true"></div>
+          <div><p class="edu-title">BBM IB</p><p class="edu-sub">Business Management</p></div>
+        </div>
+        <div class="edu-item">
+          <div class="edu-dot" aria-hidden="true"></div>
+          <div><p class="edu-title">Diploma in Civil Engineering</p><p class="edu-sub">Technical qualification</p></div>
+        </div>
+        <div class="edu-item">
+          <div class="edu-dot" aria-hidden="true"></div>
+          <div><p class="edu-title">Quality Control Certification</p><p class="edu-sub">Civil practices</p></div>
+        </div>
+        <div class="edu-item">
+          <div class="edu-dot" aria-hidden="true"></div>
+          <div><p class="edu-title">Modi Script</p><p class="edu-sub">Certificate course · ancient Marathi script</p></div>
+        </div>
+        <div class="edu-item">
+          <div class="edu-dot" aria-hidden="true"></div>
+          <div><p class="edu-title">SSC</p><p class="edu-sub">10th standard</p></div>
+        </div>
+      </div>
+
+      <!-- COL 3 ROW 3-4: Marathons -->
+      <div class="card c-marathon">
+        <p class="card-label">Marathons</p>
+        <div class="marathon-list">
+          <div class="marathon">
+            <div class="m-rank r1" aria-label="1st">1</div>
+            <div class="m-info"><p class="m-name">TMM 2026</p><p class="m-year">Tata Mumbai Marathon</p></div>
+            <div class="m-bar-wrap" aria-hidden="true"><div class="m-bar" style="width:100%"></div></div>
+            <span class="m-time">3:53:50</span>
+          </div>
+          <div class="marathon">
+            <div class="m-rank r2" aria-label="2nd">2</div>
+            <div class="m-info"><p class="m-name">TMM 2025</p><p class="m-year">Tata Mumbai Marathon</p></div>
+            <div class="m-bar-wrap" aria-hidden="true"><div class="m-bar" style="width:82%"></div></div>
+            <span class="m-time">3:59:30</span>
+          </div>
+          <div class="marathon">
+            <div class="m-rank r3" aria-label="3rd">3</div>
+            <div class="m-info"><p class="m-name">TMM 2024</p><p class="m-year">Tata Mumbai Marathon</p></div>
+            <div class="m-bar-wrap" aria-hidden="true"><div class="m-bar" style="width:55%"></div></div>
+            <span class="m-time">4:59:30</span>
+          </div>
+        </div>
+        <div class="improving" aria-label="Improving trend">↑ 1:05:40 faster since 2024</div>
+      </div>
+
+      <!-- COL 3 ROW 5: PnP Teaser -->
+      <div class="pnp-card c-pnp">
+        <p class="pnp-label">A side project that became a universe</p>
+        <h2 class="pnp-title">Puddles & Pulsars</h2>
+        <p class="pnp-desc">A small corner of the internet where sustainability meets play — a waste segregation game, a carbon tracker called Ripple, and a book being written one thought at a time.</p>
+        <div class="pnp-tiles">
+          <a href="/game" class="pnp-tile" aria-label="Play the Waste Segregation game">
+            <svg width="16" height="16" viewBox="0 0 52 52" aria-hidden="true">
+              <rect x="11" y="18" width="30" height="26" rx="3" fill="#14532d" stroke="#16a34a" stroke-width="0.8"/>
+              <rect x="8"  y="13" width="36" height="6"  rx="2" fill="#16a34a" stroke="#4ade80" stroke-width="0.6"/>
+              <rect x="20" y="10" width="12" height="4"  rx="2" fill="#22c55e"/>
+            </svg>
+            <div><div class="pnp-tile-label">Waste Game</div><div class="pnp-tile-tag">Play →</div></div>
+          </a>
+          <a href="/ripple" class="pnp-tile" aria-label="Open Ripple carbon calculator">
+            <svg width="16" height="16" viewBox="0 0 32 32" aria-hidden="true">
+              <circle cx="16" cy="16" r="3"  fill="#0f6e56"/>
+              <circle cx="16" cy="16" r="7"  fill="none" stroke="#1d9e75" stroke-width="1.5" opacity="0.75"/>
+              <circle cx="16" cy="16" r="11" fill="none" stroke="#5DCAA5" stroke-width="1"   opacity="0.5"/>
+              <circle cx="16" cy="16" r="15" fill="none" stroke="#9FE1CB" stroke-width="0.5" opacity="0.3"/>
+            </svg>
+            <div><div class="pnp-tile-label">Ripple</div><div class="pnp-tile-tag">Calculate →</div></div>
+          </a>
+          <a href="/book" class="pnp-tile" aria-label="Read the book">
+            <svg width="16" height="16" viewBox="0 0 52 52" aria-hidden="true">
+              <path d="M10 8 Q10 6 12 6 L28 6 L38 16 L38 42 Q38 44 36 44 L12 44 Q10 44 10 42 Z" fill="#1e1b4b" stroke="#4338ca" stroke-width="0.8"/>
+              <path d="M28 6 L28 16 L38 16" fill="#2d2b72" stroke="#4338ca" stroke-width="0.8"/>
+              <line x1="16" y1="23" x2="32" y2="23" stroke="#818cf8" stroke-width="1" stroke-linecap="round" opacity="0.8"/>
+              <line x1="16" y1="28" x2="32" y2="28" stroke="#818cf8" stroke-width="1" stroke-linecap="round" opacity="0.6"/>
+            </svg>
+            <div><div class="pnp-tile-label">The Book</div><div class="pnp-tile-tag">Read →</div></div>
+          </a>
+        </div>
+      </div>
+
     </div>
   </main>
 
