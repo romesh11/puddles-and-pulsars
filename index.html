@@ -285,6 +285,18 @@
     }
 
     /* ── Footer ── */
+    .footer-about{
+  display:none;
+  font-family:'DM Serif Display',serif;
+  font-style:italic;
+  font-size:1rem;
+  color:rgba(167,139,250,0.4);
+  text-decoration:none;
+  margin-top:.5rem;
+}
+@media(max-width:480px){
+  .footer-about{ display:inline-block; }
+}
     footer {
       position: relative;
       z-index: 10;
@@ -477,6 +489,7 @@
 
     <footer>
       <p>© 2026 Puddles & Pulsar</p>
+      <a href="/romeshatre" class="footer-about">RA</a>
     </footer>
   </div>
 
