@@ -1,0 +1,1334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Straight Up History</title>
+
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com"></script>
+
+<!-- Leaflet CSS + JS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<!-- Lucide Icons -->
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+
+<!-- Google Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Mono:wght@300;400&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet" />
+
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        fontFamily: {
+          display: ['Cormorant Garamond', 'serif'],
+          mono: ['DM Mono', 'monospace'],
+          body: ['Outfit', 'sans-serif'],
+        },
+        colors: {
+          bg: '#f5f2ee',
+          surface: '#ffffff',
+          border: '#e2ddd8',
+          muted: '#ece8e3',
+          text: {
+            primary: '#1a1714',
+            secondary: '#7a706a',
+            dim: '#b5ada6',
+          },
+          accent: {
+            war:       '#c0392b',
+            birth:     '#1a7a6e',
+            monument:  '#9a6b1f',
+            event:     '#2c5f9e',
+          },
+        },
+      }
+    }
+  }
+</script>
+
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: #f5f2ee;
+    color: #1a1714;
+    font-family: 'Outfit', sans-serif;
+    overflow: hidden;
+    height: 100vh; width: 100vw;
+    touch-action: none; /* we own all touch events */
+  }
+
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E");
+    pointer-events: none; z-index: 9999;
+  }
+
+  ::-webkit-scrollbar { width: 4px; height: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #d5cfc9; border-radius: 2px; }
+
+  /* Toggle */
+  .toggle-track {
+    position: relative; width: 72px; height: 28px;
+    background: #fff; border: 1px solid #d5cfc9; border-radius: 14px;
+    cursor: pointer; transition: border-color 0.2s;
+  }
+  .toggle-track:hover { border-color: #b5ada6; }
+  .toggle-thumb {
+    position: absolute; top: 3px; left: 3px; width: 30px; height: 20px;
+    background: linear-gradient(135deg, #2c5f9e, #1a4070);
+    border-radius: 10px; transition: transform 0.25s cubic-bezier(.4,0,.2,1);
+    box-shadow: 0 2px 6px rgba(44,95,158,0.3);
+  }
+  .toggle-track.map-active .toggle-thumb {
+    transform: translateX(36px);
+    background: linear-gradient(135deg, #1a7a6e, #125a52);
+    box-shadow: 0 2px 6px rgba(26,122,110,0.3);
+  }
+
+  /* Chips */
+  .chip {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 4px 12px; border-radius: 20px;
+    border: 1px solid #d5cfc9; background: #fff;
+    font-size: 11px; letter-spacing: 0.06em;
+    cursor: pointer; transition: all 0.18s; white-space: nowrap; color: #7a706a;
+  }
+  .chip:hover { border-color: #b5ada6; color: #1a1714; }
+  .chip.active { background: #f0ece8; color: #1a1714; }
+  .chip.active.war      { border-color: #c0392b; color: #c0392b; }
+  .chip.active.birth    { border-color: #1a7a6e; color: #1a7a6e; }
+  .chip.active.monument { border-color: #9a6b1f; color: #9a6b1f; }
+  .chip.active.event    { border-color: #2c5f9e; color: #2c5f9e; }
+  .chip.active.all      { border-color: #1a1714; }
+
+  /* Timeline */
+  #timeline-view {
+    width: 100%; height: 100%;
+    position: relative; overflow: hidden;
+    cursor: grab; user-select: none;
+    touch-action: none; /* CRITICAL: prevent browser scroll hijack */
+  }
+  #timeline-view.panning { cursor: grabbing; }
+  #timeline-canvas {
+    position: absolute; top: 0; left: 0;
+    will-change: transform; transform-origin: 0 0;
+  }
+
+  .axis-line {
+    position: absolute; height: 1px;
+    background: linear-gradient(90deg, transparent, #c8c0b8 4%, #c8c0b8 96%, transparent);
+  }
+  .tick-mark { position: absolute; width: 1px; background: #d5cfc9; pointer-events: none; }
+  .tick-mark.major { background: #b5ada6; }
+  .tick-label {
+    position: absolute; font-family: 'DM Mono', monospace; font-size: 10px;
+    color: #b5ada6; transform: translateX(-50%); letter-spacing: 0.05em;
+    pointer-events: none; white-space: nowrap;
+  }
+
+  .event-dot {
+    position: absolute; transform: translate(-50%, -50%);
+    cursor: pointer; z-index: 10;
+    transition: transform 0.15s cubic-bezier(.4,0,.2,1);
+  }
+  .event-dot:hover { transform: translate(-50%,-50%) scale(1.9); z-index: 20; }
+  .event-dot .dot-inner {
+    width: 11px; height: 11px; border-radius: 50%;
+    border: 2px solid rgba(255,255,255,0.9);
+    box-shadow: 0 1px 5px rgba(0,0,0,0.18);
+    transition: box-shadow 0.15s;
+  }
+  .event-dot:hover .dot-inner { box-shadow: 0 0 0 3px currentColor, 0 2px 8px rgba(0,0,0,0.15); }
+  .event-dot.war      { color: #c0392b; } .event-dot.war      .dot-inner { background: #c0392b; }
+  .event-dot.birth    { color: #1a7a6e; } .event-dot.birth    .dot-inner { background: #1a7a6e; }
+  .event-dot.monument { color: #9a6b1f; } .event-dot.monument .dot-inner { background: #9a6b1f; }
+  .event-dot.event    { color: #2c5f9e; } .event-dot.event    .dot-inner { background: #2c5f9e; }
+
+  .connector { position: absolute; width: 1px; pointer-events: none; }
+  .event-year-label {
+    position: absolute; font-family: 'DM Mono', monospace; font-size: 9px;
+    color: #b5ada6; transform: translateX(-50%); pointer-events: none; white-space: nowrap;
+  }
+  .event-title-label {
+    position: absolute; font-family: 'Cormorant Garamond', serif; font-size: 11px;
+    color: #7a706a; transform: translateX(-50%); pointer-events: none; white-space: nowrap;
+    opacity: 0; transition: opacity 0.2s; max-width: 120px;
+    overflow: hidden; text-overflow: ellipsis; text-align: center;
+  }
+  .event-title-label.show { opacity: 1; }
+
+  /* Tooltip */
+  #tooltip {
+    position: fixed; pointer-events: none; z-index: 1000;
+    background: #fff; border: 1px solid #e2ddd8; border-radius: 8px;
+    padding: 10px 14px; max-width: 220px;
+    opacity: 0; transition: opacity 0.12s;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.09);
+  }
+  #tooltip.visible { opacity: 1; }
+  #tooltip .t-title { font-family: 'Cormorant Garamond', serif; font-size: 14px; color: #1a1714; line-height: 1.3; }
+  #tooltip .t-date  { font-family: 'DM Mono', monospace; font-size: 10px; color: #7a706a; margin-top: 3px; letter-spacing: 0.06em; }
+  #tooltip .t-cat   { font-size: 9px; text-transform: uppercase; letter-spacing: 0.1em; margin-top: 5px; font-weight: 500; }
+
+  /* Modal */
+  #modal-overlay {
+    position: fixed; inset: 0; background: rgba(26,23,20,0.35);
+    backdrop-filter: blur(4px); z-index: 500;
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; pointer-events: none; transition: opacity 0.25s;
+    padding: 20px;
+  }
+  #modal-overlay.open { opacity: 1; pointer-events: all; }
+  #modal {
+    background: #fff; border: 1px solid #e2ddd8; border-radius: 16px;
+    max-width: 580px; width: 100%; max-height: 90vh;
+    display: flex; flex-direction: column;
+    transform: translateY(12px) scale(0.98);
+    transition: transform 0.25s cubic-bezier(.4,0,.2,1);
+    box-shadow: 0 16px 60px rgba(0,0,0,0.12); position: relative;
+    overflow: hidden;
+  }
+  #modal-overlay.open #modal { transform: translateY(0) scale(1); }
+  #modal .m-close {
+    position: absolute; top: 12px; right: 12px; z-index: 10;
+    background: rgba(255,255,255,0.92); border: 1px solid #e2ddd8;
+    color: #7a706a; width: 28px; height: 28px; border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; transition: all 0.15s; backdrop-filter: blur(4px);
+  }
+  #modal .m-close:hover { background: #f0ece8; color: #1a1714; }
+  /* Image */
+  #modal .m-image-wrap {
+    flex-shrink: 0; background: #f0ece8;
+    display: flex; align-items: center; justify-content: center;
+    max-height: 280px; overflow: hidden; border-radius: 16px 16px 0 0;
+  }
+  #modal .m-image-wrap img {
+    max-height: 280px; max-width: 100%; width: auto; height: auto;
+    display: block; object-fit: contain;
+  }
+  #modal .m-image-wrap.hidden { display: none; }
+  /* Scrollable body */
+  #modal .m-body {
+    overflow-y: auto; flex: 1; padding: 28px 36px 32px;
+    scrollbar-width: thin; scrollbar-color: #d5cfc9 transparent;
+  }
+  #modal .m-body::-webkit-scrollbar { width: 4px; }
+  #modal .m-body::-webkit-scrollbar-thumb { background: #d5cfc9; border-radius: 2px; }
+  #modal .m-cat   { font-size: 10px; text-transform: uppercase; letter-spacing: 0.12em; font-weight: 500; margin-bottom: 10px; }
+  #modal .m-title { font-family: 'Cormorant Garamond', serif; font-size: 26px; line-height: 1.2; color: #1a1714; }
+  #modal .m-date  { font-family: 'DM Mono', monospace; font-size: 11px; color: #7a706a; margin-top: 7px; letter-spacing: 0.06em; }
+  #modal .m-tags  { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 14px; }
+  #modal .m-tag   { font-size: 10px; padding: 3px 9px; background: #f0ece8; border-radius: 4px; color: #7a706a; }
+  #modal .m-divider { height: 1px; background: #ece8e3; margin: 20px 0; }
+  #modal .m-desc  { font-size: 13px; color: #5a524c; line-height: 1.85; }
+  #modal .m-section-title {
+    font-family: 'DM Mono', monospace; font-size: 9px;
+    text-transform: uppercase; letter-spacing: 0.12em;
+    color: #b5ada6; margin-bottom: 10px;
+  }
+  #modal .m-books { display: flex; flex-direction: column; gap: 7px; }
+  #modal .m-book-item { display: flex; align-items: flex-start; gap: 8px; font-size: 12px; color: #5a524c; line-height: 1.4; }
+  #modal .m-book-item a { color: #2c5f9e; text-decoration: none; }
+  #modal .m-book-item a:hover { text-decoration: underline; }
+  #modal .m-book-icon { color: #b5ada6; flex-shrink: 0; margin-top: 1px; }
+  #modal .m-sources { display: flex; flex-direction: column; gap: 5px; }
+  #modal .m-source-item { font-size: 11px; }
+  #modal .m-source-item a { color: #7a706a; text-decoration: none; border-bottom: 1px solid #e2ddd8; transition: color 0.12s, border-color 0.12s; }
+  #modal .m-source-item a:hover { color: #2c5f9e; border-color: #2c5f9e; }
+  #modal .m-read-more {
+    display: inline-flex; align-items: center; gap: 6px; margin-top: 20px;
+    font-size: 12px; font-weight: 500; letter-spacing: 0.04em;
+    color: #2c5f9e; text-decoration: none;
+    padding: 8px 16px; border: 1px solid #2c5f9e;
+    border-radius: 6px; transition: all 0.15s;
+  }
+  #modal .m-read-more:hover { background: #2c5f9e; color: #fff; }
+  /* Data status badge */
+  #data-status {
+    position: fixed; bottom: 16px; right: 16px;
+    font-family: 'DM Mono', monospace; font-size: 9px;
+    color: #b5ada6; letter-spacing: 0.06em;
+    display: flex; align-items: center; gap: 5px;
+    z-index: 100; pointer-events: none;
+  }
+  #data-status .ds-dot { width: 5px; height: 5px; border-radius: 50%; background: #b5ada6; }
+  #data-status.live .ds-dot { background: #1a7a6e; }
+  #data-status.error .ds-dot { background: #c0392b; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .spin { display: inline-block; animation: spin 0.8s linear infinite; }
+
+  /* Map */
+  #map-view { width: 100%; height: 100%; display: none; }
+  #map-view.active { display: block; }
+  #leaflet-map { width: 100%; height: 100%; }
+  .leaflet-container { background: #f5f2ee !important; }
+  .leaflet-popup-content-wrapper { background: #fff !important; border: 1px solid #e2ddd8 !important; border-radius: 10px !important; box-shadow: 0 4px 20px rgba(0,0,0,0.09) !important; }
+  .leaflet-popup-tip { background: #fff !important; }
+  .leaflet-popup-content { font-family: 'Outfit', sans-serif; font-size: 13px; color: #5a524c; }
+  .leaflet-popup-content strong { font-family: 'Cormorant Garamond', serif; font-size: 15px; color: #1a1714; display: block; margin-bottom: 2px; }
+  .leaflet-popup-close-button { color: #7a706a !important; }
+
+  /* Calendar dropdown */
+  #cal-dropdown {
+    position: absolute; top: calc(100% + 8px); right: 0;
+    background: #fff; border: 1px solid #e2ddd8; border-radius: 10px;
+    padding: 8px; min-width: 180px; z-index: 200;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.09);
+    opacity: 0; pointer-events: none; transform: translateY(-4px);
+    transition: all 0.18s cubic-bezier(.4,0,.2,1);
+  }
+  #cal-dropdown.open { opacity: 1; pointer-events: all; transform: translateY(0); }
+  .cal-item { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 6px; cursor: pointer; font-size: 12px; color: #7a706a; transition: all 0.12s; }
+  .cal-item:hover { background: #f0ece8; color: #1a1714; }
+  .cal-item .cal-icon { width: 16px; height: 16px; border-radius: 3px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 600; }
+  .cal-divider { height: 1px; background: #ece8e3; margin: 4px 0; }
+  .cal-note { font-size: 10px; color: #b5ada6; padding: 6px 10px; }
+
+  /* Zoom buttons */
+  .zoom-btn {
+    width: 28px; height: 28px; background: #fff; border: 1px solid #d5cfc9;
+    border-radius: 6px; display: flex; align-items: center; justify-content: center;
+    cursor: pointer; color: #7a706a; transition: all 0.15s;
+    font-size: 16px; line-height: 1; font-weight: 300; user-select: none;
+  }
+  .zoom-btn:hover { background: #f0ece8; color: #1a1714; border-color: #b5ada6; }
+  #scale-label {
+    font-family: 'DM Mono', monospace; font-size: 10px; color: #b5ada6;
+    letter-spacing: 0.06em; min-width: 32px; text-align: center;
+  }
+
+  /* Touch hint */
+  #touch-hint {
+    position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
+    font-size: 10px; color: #b5ada6; letter-spacing: 0.1em; text-transform: uppercase;
+    pointer-events: none; display: none;
+    background: rgba(245,242,238,0.9); padding: 4px 12px;
+    border-radius: 20px; border: 1px solid #e2ddd8;
+  }
+  @media (max-width: 640px) { #touch-hint { display: block; } }
+
+  @keyframes dotIn {
+    from { opacity: 0; transform: translate(-50%,-50%) scale(0); }
+    to   { opacity: 1; transform: translate(-50%,-50%) scale(1); }
+  }
+  .event-dot { animation: dotIn 0.35s cubic-bezier(.4,0,.2,1) both; }
+
+  @media (max-width: 640px) {
+    #modal { padding: 24px 20px; }
+    #modal .m-title { font-size: 22px; }
+    .chip span { display: none; }
+  }
+</style>
+
+</head>
+<body>
+
+<!-- ══════════ TOOLTIP ══════════ -->
+<div id="tooltip">
+  <div class="t-title" id="tt-title"></div>
+  <div class="t-date"  id="tt-date"></div>
+  <div class="t-cat"   id="tt-cat"></div>
+</div>
+
+<!-- ══════════ MODAL ══════════ -->
+<div id="modal-overlay" onclick="if(event.target===this)closeModal()">
+  <div id="modal">
+    <button class="m-close" onclick="closeModal()"><i data-lucide="x" style="width:14px;height:14px"></i></button>
+    <!-- Image banner — shown only when image_url exists -->
+    <div class="m-image-wrap hidden" id="m-image-wrap">
+      <img id="m-image" src="" alt="" />
+    </div>
+    <!-- Scrollable content body -->
+    <div class="m-body">
+      <div class="m-cat"  id="m-cat"></div>
+      <div class="m-title" id="m-title"></div>
+      <div class="m-date"  id="m-date"></div>
+      <div class="m-tags"  id="m-tags"></div>
+      <div class="m-divider"></div>
+      <!-- Description -->
+      <div class="m-desc" id="m-desc"></div>
+      <!-- Books -->
+      <div id="m-books-section" style="display:none;">
+        <div class="m-divider"></div>
+        <div class="m-section-title">Books to Read</div>
+        <div class="m-books" id="m-books"></div>
+      </div>
+      <!-- Sources -->
+      <div id="m-sources-section" style="display:none;">
+        <div class="m-divider"></div>
+        <div class="m-section-title">Sources &amp; References</div>
+        <div class="m-sources" id="m-sources"></div>
+      </div>
+      <!-- Read more -->
+      <div id="m-readmore-section" style="display:none;">
+        <a class="m-read-more" id="m-read-more" href="#" target="_blank" rel="noopener">
+          Read the full story
+          <i data-lucide="arrow-right" style="width:12px;height:12px;"></i>
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ DATA STATUS ══════════ -->
+<div id="data-status">
+  <div class="ds-dot"></div>
+  <span id="data-status-text">local data</span>
+</div>
+
+<!-- ══════════ APP SHELL ══════════ -->
+<div style="display:flex;flex-direction:column;height:100vh;width:100vw;">
+
+  <!-- ── HEADER ── -->
+  <header style="flex-shrink:0;padding:0 24px;height:56px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #e2ddd8;background:#faf8f5;z-index:100;">
+
+    <!-- Wordmark -->
+    <div style="display:flex;align-items:baseline;gap:8px;">
+      <span style="font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:600;letter-spacing:0.01em;color:#1a1714;">Straight Up</span>
+      <span style="font-family:'DM Mono',monospace;font-size:11px;color:#b5ada6;letter-spacing:0.1em;text-transform:uppercase;">History</span>
+    </div>
+
+    <!-- Right controls -->
+    <div style="display:flex;align-items:center;gap:12px;">
+
+      <!-- View toggle -->
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span style="font-size:10px;color:#b5ada6;letter-spacing:0.08em;text-transform:uppercase;" id="toggle-label-timeline">Timeline</span>
+        <div class="toggle-track" id="view-toggle" onclick="toggleView()">
+          <div class="toggle-thumb"></div>
+        </div>
+        <span style="font-size:10px;color:#b5ada6;letter-spacing:0.08em;text-transform:uppercase;" id="toggle-label-map">Map</span>
+      </div>
+
+      <!-- Calendar sync -->
+      <div style="position:relative;">
+        <button id="cal-btn" onclick="toggleCalDropdown(event)"
+          style="display:flex;align-items:center;gap:6px;padding:5px 10px;background:#fff;border:1px solid #d5cfc9;border-radius:7px;color:#7a706a;font-size:11px;cursor:pointer;transition:all 0.15s;letter-spacing:0.05em;"
+          onmouseenter="this.style.color='#1a1714';this.style.borderColor='#b5ada6'"
+          onmouseleave="this.style.color='#7a706a';this.style.borderColor='#d5cfc9'">
+          <i data-lucide="calendar-plus" style="width:13px;height:13px;"></i>
+          <span>Sync</span>
+        </button>
+
+        <div id="cal-dropdown">
+          <div class="cal-note">Sync historical events</div>
+          <div class="cal-divider"></div>
+          <div class="cal-item" onclick="alert('Google Calendar integration coming soon!')">
+            <div class="cal-icon" style="background:#4285F4;color:#fff;">G</div>
+            Google Calendar
+          </div>
+          <div class="cal-item" onclick="alert('iCal (.ics) export coming soon!')">
+            <div class="cal-icon" style="background:#e2ddd8;color:#1a1714;">
+              <i data-lucide="apple" style="width:10px;height:10px;"></i>
+            </div>
+            iCal / Apple Calendar
+          </div>
+          <div class="cal-item" onclick="alert('Outlook integration coming soon!')">
+            <div class="cal-icon" style="background:#0078d4;color:#fff;">O</div>
+            Outlook
+          </div>
+          <div class="cal-divider"></div>
+          <div class="cal-note">Full integration in production</div>
+        </div>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- ── FILTER BAR ── -->
+  <div id="filter-bar" style="flex-shrink:0;padding:8px 24px;border-bottom:1px solid #e2ddd8;display:flex;align-items:center;gap:8px;overflow-x:auto;background:#faf8f5;">
+    <span style="font-size:10px;color:#b5ada6;letter-spacing:0.1em;text-transform:uppercase;margin-right:4px;white-space:nowrap;flex-shrink:0;">Filter</span>
+    <div class="chip active all" data-cat="all" onclick="toggleFilter(this)">
+      <i data-lucide="layout-grid" style="width:11px;height:11px;"></i>
+      <span>All</span>
+    </div>
+    <div class="chip war" data-cat="war" onclick="toggleFilter(this)">
+      <i data-lucide="sword" style="width:11px;height:11px;"></i>
+      <span>Wars</span>
+    </div>
+    <div class="chip birth" data-cat="birth" onclick="toggleFilter(this)">
+      <i data-lucide="star" style="width:11px;height:11px;"></i>
+      <span>Births / Deaths</span>
+    </div>
+    <div class="chip monument" data-cat="monument" onclick="toggleFilter(this)">
+      <i data-lucide="landmark" style="width:11px;height:11px;"></i>
+      <span>Monuments</span>
+    </div>
+    <div class="chip event" data-cat="event" onclick="toggleFilter(this)">
+      <i data-lucide="zap" style="width:11px;height:11px;"></i>
+      <span>Major Events</span>
+    </div>
+
+    <div style="flex:1;"></div>
+
+    <!-- Result count -->
+    <span id="result-count" style="font-family:'DM Mono',monospace;font-size:10px;color:#b5ada6;white-space:nowrap;letter-spacing:0.06em;">6 events</span>
+
+    <!-- Zoom controls (timeline only) -->
+    <div id="zoom-controls" style="display:flex;align-items:center;gap:4px;margin-left:4px;">
+      <div class="zoom-btn" onclick="adjustZoom(1/0.7)" title="Zoom in">+</div>
+      <div id="scale-label">526 yrs</div>
+      <div class="zoom-btn" onclick="adjustZoom(0.7)" title="Zoom out">−</div>
+    </div>
+  </div>
+
+  <!-- ── MAIN CONTENT AREA ── -->
+  <div style="flex:1;position:relative;overflow:hidden;">
+
+    <!-- Timeline View -->
+    <div id="timeline-view">
+      <div id="timeline-canvas"></div>
+      <div id="touch-hint">Swipe to explore · Pinch to zoom</div>
+    </div>
+
+    <!-- Map View -->
+    <div id="map-view">
+      <div id="leaflet-map"></div>
+    </div>
+
+  </div>
+
+</div><!-- end app shell -->
+
+
+<script>
+// ═══════════════════════════════════════════════════
+//  DATA
+// ═══════════════════════════════════════════════════
+const events = [
+  {
+    id: 1,
+    title: "Fall of Tenochtitlán",
+    date: "13 August 1521",
+    year: 1521,
+    year_end: null,
+    category: "war",
+    tags: ["Aztec Empire", "Spanish Conquest", "Hernán Cortés", "Mesoamerica"],
+    description: "Spanish conquistador Hernán Cortés, allied with Tlaxcalan warriors, completed the siege of the Aztec capital Tenochtitlán after 75 days of brutal urban warfare. The fall marked the definitive end of the Aztec Empire and the beginning of three centuries of Spanish colonial rule over Mexico.",
+    image_url: "",
+    sources: [
+      { label: "Wikipedia — Fall of Tenochtitlan", url: "https://en.wikipedia.org/wiki/Fall_of_Tenochtitlan" },
+      { label: "Britannica — Hernán Cortés", url: "https://www.britannica.com/biography/Hernan-Cortes" }
+    ],
+    books: [
+      { title: "Conquest by Hugh Thomas", url: "https://www.goodreads.com/book/show/242452.Conquest" },
+      { title: "1491 by Charles C. Mann", url: "https://www.goodreads.com/book/show/39020.1491" }
+    ],
+    read_more_url: "https://en.wikipedia.org/wiki/Fall_of_Tenochtitlan",
+    lat: 19.4326, lng: -99.1332,
+  },
+  {
+    id: 2,
+    title: "Birth of Isaac Newton",
+    date: "25 December 1642",
+    year: 1642,
+    year_end: null,
+    category: "birth",
+    tags: ["Science", "Physics", "Mathematics", "England"],
+    description: "Isaac Newton was born in Woolsthorpe, Lincolnshire. He would go on to formulate the laws of motion and universal gravitation, develop calculus, and advance the understanding of light and optics — laying the foundations of classical mechanics and the scientific revolution.",
+    image_url: "",
+    sources: [
+      { label: "Wikipedia — Isaac Newton", url: "https://en.wikipedia.org/wiki/Isaac_Newton" }
+    ],
+    books: [
+      { title: "Isaac Newton by James Gleick", url: "https://www.goodreads.com/book/show/173362.Isaac_Newton" }
+    ],
+    read_more_url: "https://www.britannica.com/biography/Isaac-Newton",
+    lat: 52.8016, lng: -0.6412,
+  },
+  {
+    id: 3,
+    title: "Construction of the Taj Mahal",
+    date: "1632 – 1653",
+    year: 1632,
+    year_end: 1653,
+    category: "monument",
+    tags: ["Mughal Empire", "Architecture", "India", "Shah Jahan"],
+    description: "Commissioned by Mughal Emperor Shah Jahan as an eternal memorial to his beloved wife Mumtaz Mahal who died in 1631, the Taj Mahal took over 20 years and 20,000 artisans to complete. Its white marble dome and minarets are considered the pinnacle of Mughal architecture and a symbol of enduring love.",
+    image_url: "",
+    sources: [
+      { label: "UNESCO — Taj Mahal", url: "https://whc.unesco.org/en/list/252/" },
+      { label: "Wikipedia — Taj Mahal", url: "https://en.wikipedia.org/wiki/Taj_Mahal" }
+    ],
+    books: [
+      { title: "Taj Mahal: Passion and Genius at the Heart of the Moghul Empire by John Freely", url: "https://www.goodreads.com/book/show/2507485.Taj_Mahal" }
+    ],
+    read_more_url: "https://en.wikipedia.org/wiki/Taj_Mahal",
+    lat: 27.1751, lng: 78.0421,
+  },
+  {
+    id: 4,
+    title: "American Declaration of Independence",
+    date: "4 July 1776",
+    year: 1776,
+    year_end: null,
+    category: "event",
+    tags: ["Revolution", "USA", "Democracy", "Founding Documents"],
+    description: "The Continental Congress formally adopted the Declaration of Independence, severing ties with the British Crown and announcing the birth of the United States of America. Principally authored by Thomas Jefferson, the document proclaimed self-evident truths about liberty and equality that would resonate across the globe for centuries.",
+    image_url: "",
+    sources: [
+      { label: "National Archives — Declaration of Independence", url: "https://www.archives.gov/founding-docs/declaration" },
+      { label: "Wikipedia", url: "https://en.wikipedia.org/wiki/United_States_Declaration_of_Independence" }
+    ],
+    books: [
+      { title: "The Declaration of Independence by Carl Becker", url: "https://www.goodreads.com/book/show/453560.The_Declaration_of_Independence" },
+      { title: "American Scripture by Pauline Maier", url: "https://www.goodreads.com/book/show/175341.American_Scripture" }
+    ],
+    read_more_url: "https://www.archives.gov/founding-docs/declaration",
+    lat: 39.9489, lng: -75.1500,
+  },
+  {
+    id: 5,
+    title: "Moon Landing — Apollo 11",
+    date: "20 July 1969",
+    year: 1969,
+    year_end: null,
+    category: "event",
+    tags: ["NASA", "Space Race", "Cold War", "Armstrong"],
+    description: "Neil Armstrong and Buzz Aldrin became the first humans to walk on the Moon, while Michael Collins orbited above in the Command Module. Armstrong's words — 'one small step for man, one giant leap for mankind' — were broadcast live to an estimated 600 million viewers, a defining moment of the 20th century.",
+    image_url: "",
+    sources: [
+      { label: "NASA — Apollo 11 Mission", url: "https://www.nasa.gov/mission_pages/apollo/apollo-11.html" },
+      { label: "Wikipedia — Apollo 11", url: "https://en.wikipedia.org/wiki/Apollo_11" }
+    ],
+    books: [
+      { title: "Carrying the Fire by Michael Collins", url: "https://www.goodreads.com/book/show/1613155.Carrying_the_Fire" },
+      { title: "First Man by James R. Hansen", url: "https://www.goodreads.com/book/show/205589.First_Man" }
+    ],
+    read_more_url: "https://www.nasa.gov/mission_pages/apollo/apollo-11.html",
+    lat: 28.5721, lng: -80.6480,
+  },
+  {
+    id: 6,
+    title: "Fall of the Berlin Wall",
+    date: "9 November 1989",
+    year: 1989,
+    year_end: null,
+    category: "event",
+    tags: ["Cold War", "Germany", "Reunification", "Democracy"],
+    description: "East Germany announced that citizens could freely cross its borders, and jubilant crowds began dismantling the wall that had divided Berlin since 1961. The fall signalled the collapse of communist regimes across Eastern Europe and set in motion the reunification of Germany, effectively ending the Cold War.",
+    image_url: "",
+    sources: [
+      { label: "BBC — The Fall of the Berlin Wall", url: "https://www.bbc.co.uk/history/events/the_fall_of_the_berlin_wall" },
+      { label: "Wikipedia — Berlin Wall", url: "https://en.wikipedia.org/wiki/Berlin_Wall" }
+    ],
+    books: [
+      { title: "The Collapse by Mary Elise Sarotte", url: "https://www.goodreads.com/book/show/20563331-the-collapse" },
+      { title: "1989 by Frederick Taylor", url: "https://www.goodreads.com/book/show/8428013-1989" }
+    ],
+    read_more_url: "https://en.wikipedia.org/wiki/Fall_of_the_Berlin_Wall",
+    lat: 52.5160, lng: 13.3779,
+  },
+];
+
+// ═══════════════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════════════
+let activeFilters = new Set(['all']);
+let currentView   = 'timeline';
+let leafletMap    = null;
+let mapMarkers    = [];
+
+// ── Timeline geometry ──
+const YEAR_START = 1500;
+const YEAR_END   = 2026;
+const YEAR_SPAN  = YEAR_END - YEAR_START;           // 526
+const BASE_PX_PER_YEAR = 5;                         // px at scale 1
+const BASE_WIDTH = YEAR_SPAN * BASE_PX_PER_YEAR;   // 2630 px at scale 1
+
+// ── Zoom bounds ──
+// MIN_SCALE: whole timeline just fits viewport (~1 screen)
+// MAX_SCALE: 1 year = viewport width (zoomed to single event)
+let MIN_SCALE = 1;                                  // recalculated in init
+const MAX_SCALE = 200;                              // ~1 year fills screen
+
+// ── Current view state ──
+let scale   = 1;
+let panX    = 0;                                    // canvas left edge offset in screen px
+
+// ── Interaction state ──
+let isDragging   = false;
+let dragStartX   = 0;
+let dragPanStart = 0;
+// Touch state — two finger tracking
+let touch0 = null, touch1 = null;
+let pinchStartDist  = 0;
+let pinchStartScale = 1;
+let pinchStartPanX  = 0;
+let pinchMidX       = 0;
+// rAF throttle
+let rafPending = false;
+
+// ── Helpers ──
+function getTV()  { return document.getElementById('timeline-view'); }
+function getVW()  { return getTV().offsetWidth; }
+function getVH()  { return getTV().offsetHeight; }
+function canvasW(){ return BASE_WIDTH * scale; }
+
+function yearToPx(y) { return (y - YEAR_START) / YEAR_SPAN * BASE_WIDTH; }
+
+function clampPan(px) {
+  const max = 0;
+  const min = Math.min(0, getVW() - canvasW());
+  return Math.max(min, Math.min(max, px));
+}
+
+function applyTransform() {
+  document.getElementById('timeline-canvas').style.transform = `translateX(${panX}px)`;
+}
+
+function scheduleRedraw() {
+  if (rafPending) return;
+  rafPending = true;
+  requestAnimationFrame(() => { rafPending = false; renderTimeline(); });
+}
+
+// ── Scale indicator ──
+function updateScaleLabel() {
+  // Show approximate years-per-screen
+  const yearsVisible = YEAR_SPAN / (canvasW() / getVW());
+  let label;
+  if (yearsVisible >= 200) label = Math.round(yearsVisible) + ' yrs';
+  else if (yearsVisible >= 10) label = Math.round(yearsVisible) + ' yrs';
+  else if (yearsVisible >= 1)  label = yearsVisible.toFixed(1) + ' yrs';
+  else label = (yearsVisible * 12).toFixed(0) + ' mo';
+  document.getElementById('scale-label').textContent = label;
+}
+
+// ═══════════════════════════════════════════════════
+//  FILTER
+// ═══════════════════════════════════════════════════
+function getVisibleEvents() {
+  if (activeFilters.has('all')) return events;
+  return events.filter(e => activeFilters.has(e.category));
+}
+
+function toggleFilter(el) {
+  const cat = el.dataset.cat;
+  const allChip = document.querySelector('.chip[data-cat="all"]');
+  if (cat === 'all') {
+    activeFilters = new Set(['all']);
+    document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+    allChip.classList.add('active');
+  } else {
+    activeFilters.delete('all');
+    allChip.classList.remove('active');
+    if (activeFilters.has(cat)) { activeFilters.delete(cat); el.classList.remove('active'); }
+    else { activeFilters.add(cat); el.classList.add('active'); }
+    if (activeFilters.size === 0) { activeFilters.add('all'); allChip.classList.add('active'); }
+  }
+  renderTimeline();
+  if (currentView === 'map') renderMapMarkers();
+  updateCount();
+}
+
+function updateCount() {
+  const n = getVisibleEvents().length;
+  document.getElementById('result-count').textContent = `${n} event${n!==1?'s':''}`;
+}
+
+// ═══════════════════════════════════════════════════
+//  RENDER TIMELINE
+// ═══════════════════════════════════════════════════
+const CAT_COLORS = { war:'#c0392b', birth:'#1a7a6e', monument:'#9a6b1f', event:'#2c5f9e' };
+const CAT_COLORS_LIGHT = { war:'rgba(192,57,43,0.12)', birth:'rgba(26,122,110,0.12)', monument:'rgba(154,107,31,0.12)', event:'rgba(44,95,158,0.12)' };
+const CAT_LABELS = { war:'War', birth:'Birth / Death', monument:'Monument', event:'Major Event' };
+
+function renderTimeline() {
+  const canvas = document.getElementById('timeline-canvas');
+  const vw = getVW(), vh = getVH();
+  const cw = canvasW();
+  const midY = vh / 2;
+
+  canvas.innerHTML = '';
+  canvas.style.width  = cw + 'px';
+  canvas.style.height = vh + 'px';
+  canvas.style.transform = `translateX(${panX}px)`;
+
+  // ── Axis ──
+  const axis = document.createElement('div');
+  axis.className = 'axis-line';
+  axis.style.cssText = `left:0;top:${midY}px;width:${cw}px;`;
+  canvas.appendChild(axis);
+
+  // ── Adaptive tick interval ──
+  // We want roughly 6–14 ticks visible at a time
+  const yearsOnScreen = YEAR_SPAN * (vw / cw);
+  let interval = 100;
+  if (yearsOnScreen < 200) interval = 50;
+  if (yearsOnScreen < 80)  interval = 25;
+  if (yearsOnScreen < 30)  interval = 10;
+  if (yearsOnScreen < 10)  interval = 5;
+  if (yearsOnScreen < 4)   interval = 2;
+  if (yearsOnScreen < 1.5) interval = 1;
+
+  // Only render ticks in viewport (+ small buffer)
+  const buf = 100;
+  const visStart = YEAR_START + Math.max(0, (-panX - buf) / cw * YEAR_SPAN);
+  const visEnd   = YEAR_START + Math.min(YEAR_SPAN, (-panX + vw + buf) / cw * YEAR_SPAN);
+  const tickStart = Math.floor(visStart / interval) * interval;
+
+  for (let yr = tickStart; yr <= visEnd; yr += interval) {
+    if (yr < YEAR_START || yr > YEAR_END) continue;
+    const x = yearToPx(yr) * scale;
+    const major = (yr % 100 === 0) || (interval <= 10 && yr % 10 === 0);
+    const h = major ? 14 : 7;
+
+    const tick = document.createElement('div');
+    tick.className = 'tick-mark' + (major ? ' major' : '');
+    tick.style.cssText = `left:${x}px;top:${midY - h}px;height:${h}px;`;
+    canvas.appendChild(tick);
+
+    const lbl = document.createElement('div');
+    lbl.className = 'tick-label';
+    lbl.textContent = yr;
+    lbl.style.cssText = `left:${x}px;top:${midY + 10}px;`;
+    canvas.appendChild(lbl);
+  }
+
+  // ── Events ──
+  const visible = getVisibleEvents();
+  // Stagger: assign alternating above/below per sorted year order
+  const sorted = [...visible].sort((a,b) => a.year - b.year);
+
+  sorted.forEach((ev, i) => {
+    const x = yearToPx(ev.year) * scale;
+    // skip if far off screen
+    if (x + panX < -80 || x + panX > vw + 80) return;
+
+    const above = (i % 2 === 0);
+    // Arm length scales: shorter at low zoom, longer at high zoom
+    const armLen = Math.min(60, Math.max(28, scale * 8));
+    const dotY = midY + (above ? -armLen : armLen);
+
+    // ── Connector ──
+    const conn = document.createElement('div');
+    conn.className = 'connector';
+    const connColor = CAT_COLORS[ev.category];
+    conn.style.cssText = `
+      left:${x}px;
+      top:${above ? dotY : midY}px;
+      height:${armLen}px;
+      background: linear-gradient(to ${above?'bottom':'top'}, transparent, ${connColor}55);
+    `;
+    canvas.appendChild(conn);
+
+    // ── Dot ──
+    const dot = document.createElement('div');
+    dot.className = `event-dot ${ev.category}`;
+    dot.style.cssText = `left:${x}px;top:${dotY}px;animation-delay:${i*0.05}s;`;
+    dot.innerHTML = `<div class="dot-inner"></div>`;
+    dot.addEventListener('mouseenter', (e) => showTooltip(e, ev));
+    dot.addEventListener('mousemove',  (e) => moveTooltip(e));
+    dot.addEventListener('mouseleave', hideTooltip);
+    dot.addEventListener('click',      (e) => { e.stopPropagation(); openModal(ev); });
+    // Touch tap: handled via touchend on the timeline-view (see below)
+    dot._evData = ev;
+    canvas.appendChild(dot);
+
+    // ── Year label (always shown) ──
+    const yearLbl = document.createElement('div');
+    yearLbl.className = 'event-year-label';
+    yearLbl.textContent = ev.year;
+    yearLbl.style.cssText = `left:${x}px;top:${above ? dotY-16 : dotY+14}px;`;
+    canvas.appendChild(yearLbl);
+
+    // ── Title label (appears when zoomed enough to show ~50 yrs or less) ──
+    const titleLbl = document.createElement('div');
+    titleLbl.className = 'event-title-label' + (yearsOnScreen <= 80 ? ' show' : '');
+    titleLbl.textContent = ev.title;
+    titleLbl.style.cssText = `
+      left:${x}px;
+      top:${above ? dotY - 30 : dotY + 24}px;
+      color:${CAT_COLORS[ev.category]};
+      font-size:${Math.min(12, Math.max(9, scale * 0.8))}px;
+    `;
+    canvas.appendChild(titleLbl);
+  });
+}
+
+// ═══════════════════════════════════════════════════
+//  ZOOM HELPERS
+// ═══════════════════════════════════════════════════
+function applyZoom(newScale, focalScreenX) {
+  // focalScreenX: the screen X position that should stay fixed
+  const focalCanvasX = focalScreenX - panX;        // position in canvas coords
+  const oldScale = scale;
+  scale = Math.max(MIN_SCALE, Math.min(MAX_SCALE, newScale));
+  // Keep focal point stationary: newPanX + focalCanvasX*(newScale/oldScale) = focalScreenX
+  panX  = focalScreenX - focalCanvasX * (scale / oldScale);
+  panX  = clampPan(panX);
+  updateScaleLabel();
+  renderTimeline();
+}
+
+// Zoom to frame a specific event (double-click / button)
+function zoomToEvent(ev) {
+  const vw = getVW();
+  const targetScale = vw / (BASE_PX_PER_YEAR * 2); // ~2 years fills viewport
+  const targetPanX  = vw / 2 - yearToPx(ev.year) * targetScale;
+  // Animate
+  const startScale = scale, startPan = panX;
+  const dur = 500, start = performance.now();
+  function step(now) {
+    const t = Math.min(1, (now - start) / dur);
+    const ease = t < 0.5 ? 2*t*t : -1+(4-2*t)*t; // ease-in-out
+    scale = startScale + (targetScale - startScale) * ease;
+    panX  = clampPan(startPan + (targetPanX - startPan) * ease);
+    updateScaleLabel();
+    renderTimeline();
+    if (t < 1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+
+// ── Button zoom (centres on viewport mid) ──
+function adjustZoom(factor) {
+  applyZoom(scale * factor, getVW() / 2);
+}
+
+// ═══════════════════════════════════════════════════
+//  MOUSE WHEEL ZOOM
+// ═══════════════════════════════════════════════════
+getTV().addEventListener('wheel', (e) => {
+  e.preventDefault();
+  const factor = e.deltaY < 0 ? 1 / 0.88 : 0.88;
+  applyZoom(scale * factor, e.clientX - getTV().getBoundingClientRect().left);
+}, { passive: false });
+
+// ── Double-click to zoom to event or zoom in ──
+getTV().addEventListener('dblclick', (e) => {
+  const dot = e.target.closest('.event-dot');
+  if (dot && dot._evData) { zoomToEvent(dot._evData); return; }
+  applyZoom(scale * 2.5, e.clientX - getTV().getBoundingClientRect().left);
+});
+
+// ═══════════════════════════════════════════════════
+//  MOUSE PAN
+// ═══════════════════════════════════════════════════
+getTV().addEventListener('mousedown', (e) => {
+  if (e.target.closest('.event-dot')) return;
+  isDragging   = true;
+  dragStartX   = e.clientX;
+  dragPanStart = panX;
+  getTV().classList.add('panning');
+  e.preventDefault();
+});
+document.addEventListener('mousemove', (e) => {
+  if (!isDragging) return;
+  panX = clampPan(dragPanStart + (e.clientX - dragStartX));
+  applyTransform();
+});
+document.addEventListener('mouseup', () => {
+  if (isDragging) { isDragging = false; getTV().classList.remove('panning'); }
+});
+
+// ═══════════════════════════════════════════════════
+//  TOUCH — single finger pan + two-finger pinch zoom
+//  Key fix: register listeners with {passive:false} so
+//  preventDefault() actually works and browser doesn't
+//  steal the gesture.
+// ═══════════════════════════════════════════════════
+function getTouchById(list, id) {
+  for (let t of list) if (t.identifier === id) return t;
+  return null;
+}
+
+function pinchDist() {
+  if (!touch0 || !touch1) return 0;
+  const dx = touch0.clientX - touch1.clientX;
+  const dy = touch0.clientY - touch1.clientY;
+  return Math.sqrt(dx*dx + dy*dy);
+}
+
+getTV().addEventListener('touchstart', (e) => {
+  e.preventDefault(); // stop browser scroll / page zoom
+  const tvRect = getTV().getBoundingClientRect();
+
+  if (e.touches.length === 1) {
+    touch0 = { identifier: e.touches[0].identifier, clientX: e.touches[0].clientX };
+    touch1 = null;
+    isDragging   = true;
+    dragStartX   = e.touches[0].clientX;
+    dragPanStart = panX;
+  } else if (e.touches.length >= 2) {
+    isDragging = false;
+    touch0 = { identifier: e.touches[0].identifier, clientX: e.touches[0].clientX, clientY: e.touches[0].clientY };
+    touch1 = { identifier: e.touches[1].identifier, clientX: e.touches[1].clientX, clientY: e.touches[1].clientY };
+    pinchStartDist  = pinchDist();
+    pinchStartScale = scale;
+    pinchStartPanX  = panX;
+    pinchMidX       = (touch0.clientX + touch1.clientX) / 2 - tvRect.left;
+  }
+}, { passive: false });
+
+getTV().addEventListener('touchmove', (e) => {
+  e.preventDefault();
+  const tvRect = getTV().getBoundingClientRect();
+
+  if (e.touches.length === 1 && isDragging) {
+    // Single finger: pan
+    const dx = e.touches[0].clientX - dragStartX;
+    panX = clampPan(dragPanStart + dx);
+    applyTransform();
+
+  } else if (e.touches.length >= 2) {
+    // Two fingers: pinch zoom
+    // Update touch positions
+    const t0 = getTouchById(e.touches, touch0.identifier) || e.touches[0];
+    const t1 = getTouchById(e.touches, touch1.identifier) || e.touches[1];
+    touch0 = { identifier: t0.identifier, clientX: t0.clientX, clientY: t0.clientY };
+    touch1 = { identifier: t1.identifier, clientX: t1.clientX, clientY: t1.clientY };
+
+    const dist    = pinchDist();
+    if (pinchStartDist === 0) return;
+    const ratio   = dist / pinchStartDist;
+    const newScale = Math.max(MIN_SCALE, Math.min(MAX_SCALE, pinchStartScale * ratio));
+
+    // Current mid-point in screen coords
+    const currentMidX = (touch0.clientX + touch1.clientX) / 2 - tvRect.left;
+    // The canvas point under the initial pinch mid must stay under current mid
+    const canvasFocal = pinchMidX - pinchStartPanX;
+    panX = clampPan(currentMidX - canvasFocal * (newScale / pinchStartScale));
+    scale = newScale;
+    updateScaleLabel();
+    renderTimeline();
+  }
+}, { passive: false });
+
+getTV().addEventListener('touchend', (e) => {
+  e.preventDefault();
+  if (e.touches.length === 0) {
+    isDragging = false;
+    touch0 = touch1 = null;
+  } else if (e.touches.length === 1) {
+    // Went from 2 fingers to 1 — resume panning
+    isDragging   = true;
+    dragStartX   = e.touches[0].clientX;
+    dragPanStart = panX;
+    touch1 = null;
+  }
+}, { passive: false });
+
+// ── Tap on dot to open modal (touch) ──
+getTV().addEventListener('touchend', (e) => {
+  if (e.changedTouches.length !== 1) return;
+  // Only if barely moved (tap, not pan)
+  const movedX = Math.abs(e.changedTouches[0].clientX - dragStartX);
+  if (movedX > 8) return;
+  const el = document.elementFromPoint(e.changedTouches[0].clientX, e.changedTouches[0].clientY);
+  const dot = el && el.closest('.event-dot');
+  if (dot && dot._evData) { e.stopPropagation(); openModal(dot._evData); }
+}, { passive: false });
+
+// ═══════════════════════════════════════════════════
+//  TOOLTIP
+// ═══════════════════════════════════════════════════
+const tooltip = document.getElementById('tooltip');
+
+function showTooltip(e, ev) {
+  document.getElementById('tt-title').textContent = ev.title;
+  document.getElementById('tt-date').textContent  = ev.date;
+  const cat = document.getElementById('tt-cat');
+  cat.textContent = CAT_LABELS[ev.category];
+  cat.style.color = CAT_COLORS[ev.category];
+  tooltip.classList.add('visible');
+  moveTooltip(e);
+}
+function moveTooltip(e) {
+  const tw = tooltip.offsetWidth, th = tooltip.offsetHeight;
+  let lx = e.clientX + 14, ly = e.clientY - 10;
+  if (lx + tw > window.innerWidth - 8)  lx = e.clientX - tw - 14;
+  if (ly + th > window.innerHeight - 8) ly = e.clientY - th - 10;
+  tooltip.style.left = lx + 'px';
+  tooltip.style.top  = ly + 'px';
+}
+function hideTooltip() { tooltip.classList.remove('visible'); }
+
+// ═══════════════════════════════════════════════════
+//  GOOGLE SHEETS INTEGRATION
+// ═══════════════════════════════════════════════════
+
+// ── CONFIGURE THIS ──────────────────────────────────
+// Paste your published Google Apps Script web app URL here.
+// Leave empty to use the hardcoded sample events above.
+const SHEETS_URL = '';
+// ────────────────────────────────────────────────────
+
+// Convert a Google Drive share URL to a direct image src.
+// Handles both /file/d/ID/view and /open?id=ID formats.
+function driveUrlToImg(url) {
+  if (!url) return '';
+  const m1 = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+  if (m1) return `https://drive.google.com/uc?export=view&id=${m1[1]}`;
+  const m2 = url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+  if (m2) return `https://drive.google.com/uc?export=view&id=${m2[1]}`;
+  // Already a direct URL or other host — return as-is
+  return url;
+}
+
+// Parse a pipe-separated list:  "Label | https://url , Label2 | https://url2"
+function parsePipeList(raw) {
+  if (!raw) return [];
+  return raw.split(',').map(s => s.trim()).filter(Boolean).map(item => {
+    const parts = item.split('|').map(p => p.trim());
+    return { label: parts[0] || '', url: parts[1] || '' };
+  });
+}
+
+// Map a flat row object (keys = column headers) to our event schema
+function parseSheetRow(row) {
+  return {
+    id:          Number(row.id)           || 0,
+    title:       row.title                || '',
+    date:        row.date                 || '',
+    year:        Number(row.year)         || 0,
+    year_end:    row.year_end ? Number(row.year_end) : null,
+    category:    (row.category || 'event').toLowerCase().trim(),
+    tags:        (row.tags || '').split(',').map(t => t.trim()).filter(Boolean),
+    description: row.description          || '',
+    image_url:   driveUrlToImg(row.image_url || ''),
+    sources:     parsePipeList(row.sources),
+    books:       parsePipeList(row.books),
+    read_more_url: row.read_more_url      || '',
+    lat:         parseFloat(row.lat)      || null,
+    lng:         parseFloat(row.lng)      || null,
+  };
+}
+
+function setDataStatus(state, text) {
+  const el = document.getElementById('data-status');
+  el.className = state; // '', 'live', 'error'
+  document.getElementById('data-status-text').textContent = text;
+}
+
+async function loadFromSheets() {
+  if (!SHEETS_URL) return; // use hardcoded data
+  setDataStatus('', 'loading…');
+  try {
+    const res  = await fetch(SHEETS_URL);
+    const json = await res.json();
+    if (!Array.isArray(json) || json.length === 0) throw new Error('empty');
+    // Replace global events array in place
+    events.length = 0;
+    json.forEach(row => events.push(parseSheetRow(row)));
+    setDataStatus('live', 'live · sheets');
+    renderTimeline();
+    updateCount();
+    if (currentView === 'map') renderMapMarkers();
+  } catch(err) {
+    console.warn('Sheets load failed, using local data:', err);
+    setDataStatus('error', 'sheets error · local data');
+  }
+}
+
+// ═══════════════════════════════════════════════════
+//  MODAL
+// ═══════════════════════════════════════════════════
+function openModal(ev) {
+  hideTooltip();
+
+  // Category label + colour
+  const cat = document.getElementById('m-cat');
+  cat.textContent = CAT_LABELS[ev.category] || ev.category;
+  cat.style.color = CAT_COLORS[ev.category] || '#7a706a';
+
+  // Title
+  document.getElementById('m-title').textContent = ev.title;
+
+  // Date — show range if year_end exists
+  const dateStr = ev.year_end
+    ? `${ev.date}` // date column already has the range text e.g. "1632 – 1653"
+    : ev.date;
+  document.getElementById('m-date').textContent = dateStr;
+
+  // Tags
+  document.getElementById('m-tags').innerHTML =
+    (ev.tags || []).map(t => `<span class="m-tag">${t}</span>`).join('');
+
+  // Description
+  document.getElementById('m-desc').textContent = ev.description || '';
+
+  // Image
+  const wrap = document.getElementById('m-image-wrap');
+  const img  = document.getElementById('m-image');
+  if (ev.image_url) {
+    img.src = ev.image_url;
+    img.alt = ev.title;
+    wrap.classList.remove('hidden');
+  } else {
+    wrap.classList.add('hidden');
+    img.src = '';
+  }
+
+  // Books
+  const booksSection = document.getElementById('m-books-section');
+  const booksEl = document.getElementById('m-books');
+  if (ev.books && ev.books.length) {
+    booksEl.innerHTML = ev.books.map(b => `
+      <div class="m-book-item">
+        <span class="m-book-icon"><i data-lucide="book-open" style="width:12px;height:12px;"></i></span>
+        ${b.url
+          ? `<a href="${b.url}" target="_blank" rel="noopener">${b.title}</a>`
+          : `<span>${b.title}</span>`}
+      </div>`).join('');
+    booksSection.style.display = 'block';
+  } else {
+    booksSection.style.display = 'none';
+  }
+
+  // Sources
+  const sourcesSection = document.getElementById('m-sources-section');
+  const sourcesEl = document.getElementById('m-sources');
+  if (ev.sources && ev.sources.length) {
+    sourcesEl.innerHTML = ev.sources.map((s, i) => `
+      <div class="m-source-item">
+        <span style="color:#b5ada6;font-family:'DM Mono',monospace;font-size:10px;margin-right:6px;">${i+1}.</span>
+        ${s.url
+          ? `<a href="${s.url}" target="_blank" rel="noopener">${s.label}</a>`
+          : `<span style="color:#7a706a;">${s.label}</span>`}
+      </div>`).join('');
+    sourcesSection.style.display = 'block';
+  } else {
+    sourcesSection.style.display = 'none';
+  }
+
+  // Read more
+  const rmSection = document.getElementById('m-readmore-section');
+  const rmLink    = document.getElementById('m-read-more');
+  if (ev.read_more_url) {
+    rmLink.href = ev.read_more_url;
+    rmSection.style.display = 'block';
+  } else {
+    rmSection.style.display = 'none';
+  }
+
+  // Re-init lucide icons inside the modal (new icons injected above)
+  lucide.createIcons({ attrs: { 'stroke-width': 1.5 } });
+
+  document.getElementById('modal-overlay').classList.add('open');
+  // Scroll modal body back to top
+  document.querySelector('#modal .m-body').scrollTop = 0;
+}
+
+function closeModal() {
+  document.getElementById('modal-overlay').classList.remove('open');
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+// ═══════════════════════════════════════════════════
+//  VIEW TOGGLE
+// ═══════════════════════════════════════════════════
+function toggleView() {
+  currentView = currentView === 'timeline' ? 'map' : 'timeline';
+  const tog = document.getElementById('view-toggle');
+  const tl  = document.getElementById('timeline-view');
+  const mv  = document.getElementById('map-view');
+  const zc  = document.getElementById('zoom-controls');
+  const tlL = document.getElementById('toggle-label-timeline');
+  const mpL = document.getElementById('toggle-label-map');
+
+  if (currentView === 'map') {
+    tog.classList.add('map-active');
+    tl.style.display = 'none';
+    mv.classList.add('active');
+    zc.style.display = 'none';
+    tlL.style.color  = '#b5ada6';
+    mpL.style.color  = '#1a7a6e';
+    initMap(); renderMapMarkers();
+  } else {
+    tog.classList.remove('map-active');
+    mv.classList.remove('active');
+    tl.style.display = 'block';
+    zc.style.display = 'flex';
+    tlL.style.color  = '#2c5f9e';
+    mpL.style.color  = '#b5ada6';
+    setTimeout(renderTimeline, 50);
+  }
+}
+
+// ═══════════════════════════════════════════════════
+//  LEAFLET MAP
+// ═══════════════════════════════════════════════════
+function initMap() {
+  if (leafletMap) { leafletMap.invalidateSize(); return; }
+  leafletMap = L.map('leaflet-map', { center:[30,15], zoom:2, zoomControl:false, attributionControl:false });
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom:18 }).addTo(leafletMap);
+  L.control.attribution({ prefix:false, position:'bottomright' }).addTo(leafletMap);
+}
+
+function renderMapMarkers() {
+  if (!leafletMap) return;
+  mapMarkers.forEach(m => m.remove()); mapMarkers = [];
+  getVisibleEvents().filter(e => e.lat && e.lng).forEach(ev => {
+    const color = CAT_COLORS[ev.category];
+    const icon  = L.divIcon({
+      html: `<div style="width:13px;height:13px;border-radius:50%;background:${color};border:2px solid #fff;box-shadow:0 1px 6px rgba(0,0,0,0.2);"></div>`,
+      className:'', iconSize:[13,13], iconAnchor:[6,6],
+    });
+    const m = L.marker([ev.lat, ev.lng], { icon })
+      .addTo(leafletMap)
+      .bindPopup(`<strong>${ev.title}</strong>${ev.date}<br/><span style="font-size:11px;color:#b5ada6;">${CAT_LABELS[ev.category]}</span>`)
+      .on('click', () => openModal(ev));
+    mapMarkers.push(m);
+  });
+}
+
+// ═══════════════════════════════════════════════════
+//  CALENDAR DROPDOWN
+// ═══════════════════════════════════════════════════
+function toggleCalDropdown(e) {
+  e.stopPropagation();
+  document.getElementById('cal-dropdown').classList.toggle('open');
+}
+document.addEventListener('click', () => {
+  document.getElementById('cal-dropdown').classList.remove('open');
+});
+
+// ═══════════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════════
+let initDone = false;
+function init() {
+  if (initDone) return;
+  if (getVW() === 0) return; // layout not ready yet
+  initDone = true;
+
+  lucide.createIcons({ attrs: { 'stroke-width': 1.5 } });
+
+  // MIN_SCALE = whole timeline just fits viewport width
+  MIN_SCALE = Math.max(0.05, getVW() / BASE_WIDTH);
+  scale     = MIN_SCALE * 1.3;
+
+  // Start centred around 1750
+  panX = clampPan(getVW() / 2 - yearToPx(1750) * scale);
+
+  renderTimeline();
+  updateCount();
+  updateScaleLabel();
+
+  document.getElementById('toggle-label-timeline').style.color = '#2c5f9e';
+  document.getElementById('toggle-label-map').style.color      = '#b5ada6';
+
+  // Try loading from Google Sheets (no-op if SHEETS_URL is empty)
+  loadFromSheets();
+}
+
+window.addEventListener('load', init);
+document.addEventListener('DOMContentLoaded', () => setTimeout(init, 60));
+window.addEventListener('resize', () => {
+  MIN_SCALE = Math.max(0.05, getVW() / BASE_WIDTH);
+  if (currentView === 'timeline') renderTimeline();
+  if (currentView === 'map' && leafletMap) leafletMap.invalidateSize();
+});
+</script>
+</body>
+</html>
