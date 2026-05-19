@@ -552,7 +552,8 @@
       var offsetY = (vh - renderedH) / 2;
 
       // Pulsar centre in SVG coords
-      var pulsarX = 475, pulsarY = 162;
+      var pulsarX = window.innerWidth < 768 ? 480 : 475;
+      var pulsarY = window.innerWidth < 768 ? 190 : 162;
 
       var screenX = offsetX + pulsarX * scale;
       var screenY = offsetY + pulsarY * scale;
