@@ -940,7 +940,6 @@ function renderTimeline() {
   sorted.forEach((ev, i) => {
     // Use decimal year for precise positioning, fall back to integer year
     const decYear = ev._decimalYear || ev.year;
-    const decYear = ev._decimalYear || ev.year;
     const x = yearToPx(decYear) * scale;
     if (x + panX < -80 || x + panX > vw + 80) return;
 
