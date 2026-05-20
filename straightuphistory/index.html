@@ -1220,9 +1220,7 @@ function driveUrlToImg(url) {
   const m1 = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
   const rk = url.match(/resourcekey=([a-zA-Z0-9_-]+)/);
   if (m1) {
-    let direct = `https://drive.google.com/uc?export=view&id=${m1[1]}`;
-    if (rk) direct += `&resourcekey=${rk[1]}`;
-    return direct;
+    return `https://drive.google.com/thumbnail?id=${m1[1]}&sz=w1000`;
   }
   const m2 = url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
   if (m2) return `https://drive.google.com/uc?export=view&id=${m2[1]}`;
