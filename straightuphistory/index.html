@@ -998,8 +998,9 @@ function applyZoom(newScale, focalScreenX) {
 // Zoom to frame a specific event (double-click / button)
 function zoomToEvent(ev) {
   const vw = getVW();
-  const targetScale = vw / (BASE_PX_PER_YEAR * 2); // ~2 years fills viewport
-  const targetPanX  = vw / 2 - yearToPx(ev.year) * targetScale;
+  const targetScale = vw / (BASE_PX_PER_YEAR / 7); // ~2 weeks fills viewport
+  const decYear = ev._decimalYear || ev.year;
+  const targetPanX  = vw / 2 - yearToPx(decYear) * targetScale;
   // Animate
   const startScale = scale, startPan = panX;
   const dur = 500, start = performance.now();
