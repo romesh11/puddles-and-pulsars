@@ -629,6 +629,35 @@ const events = [
   },
 ];
 
+// Pre-compute decimal years for all hardcoded events
+const MONTH_NAMES_PARSE = ['january','february','march','april','may','june',
+                           'july','august','september','october','november','december'];
+const DAYS_IN_MONTH_PARSE = [31,28,31,30,31,30,31,31,30,31,30,31];
+
+function dateToDecimalYear(dateStr, fallbackYear) {
+  if (!dateStr) return fallbackYear;
+  const s = dateStr.toLowerCase().trim();
+  let day = null, month = null, year = null;
+  s.replace(/,/g, '').split(/\s+/).forEach(p => {
+    const n = parseInt(p);
+    if (!isNaN(n)) {
+      if (n > 31) year = n;
+      else if (day === null) day = n;
+    } else {
+      const mi = MONTH_NAMES_PARSE.findIndex(m => p.startsWith(m.slice(0,3)));
+      if (mi >= 0) month = mi;
+    }
+  });
+  if (year === null) year = fallbackYear;
+  if (month === null) return year;
+  if (day === null) day = 15;
+  const dayOfYear = DAYS_IN_MONTH_PARSE.slice(0, month).reduce((a,b) => a+b, 0) + day;
+  return year + (dayOfYear - 1) / 365;
+}
+
+events.forEach(ev => {
+  ev._decimalYear = dateToDecimalYear(ev.date, ev.year);
+});
 // ═══════════════════════════════════════════════════
 //  STATE
 // ═══════════════════════════════════════════════════
@@ -1198,6 +1227,8 @@ function parseSheetRow(row) {
     lat:         parseFloat(row.lat)      || null,
     lng:         parseFloat(row.lng)      || null,
   };
+  obj._decimalYear = dateToDecimalYear(obj.date, obj.year);
+  return obj;
 }
 
 function setDataStatus(state, text) {
