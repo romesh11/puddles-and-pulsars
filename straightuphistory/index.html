@@ -648,7 +648,7 @@ const BASE_WIDTH = YEAR_SPAN * BASE_PX_PER_YEAR;   // 2630 px at scale 1
 // MIN_SCALE: whole timeline just fits viewport (~1 screen)
 // MAX_SCALE: 1 year = viewport width (zoomed to single event)
 let MIN_SCALE = 1;                                  // recalculated in init
-const MAX_SCALE = 200;                              // ~1 year fills screen
+const MAX_SCALE = 10000;                              // ~1 year fills screen
 
 // ── Current view state ──
 let scale   = 1;
