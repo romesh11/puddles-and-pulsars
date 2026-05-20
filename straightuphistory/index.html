@@ -885,8 +885,8 @@ function renderTimeline() {
     const x = yearToPx(decYear) * scale;
     if (x + panX < -80 || x + panX > vw + 80) return;
 
-    const above = (i % 2 === 0);
-    const armLen = 40;
+    const above  = (ev.id % 2 !== 0);
+    const armLen = [32, 48, 64][ev.id % 3];
     const dotY = midY + (above ? -armLen : armLen);
 
     const conn = document.createElement('div');
