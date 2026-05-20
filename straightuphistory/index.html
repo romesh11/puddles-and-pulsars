@@ -886,7 +886,7 @@ function renderTimeline() {
     if (x + panX < -80 || x + panX > vw + 80) return;
 
     const above = (i % 2 === 0);
-    const armLen = Math.min(80, Math.max(36, yearsOnScreen * 2.5 + 20));
+    const armLen = 40;
     const dotY = midY + (above ? -armLen : armLen);
 
     const conn = document.createElement('div');
@@ -1358,7 +1358,7 @@ function renderMapMarkers() {
   getVisibleEvents().filter(e => e.lat && e.lng).forEach(ev => {
     const color = CAT_COLORS[ev.category];
     const icon  = L.divIcon({
-      html: `<div style="width:16px;height:16px;border-radius:50%;background:${color};border:2.5px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,0.35);"></div>`,
+      html: `<div style="width:16px;height:16px;border-radius:50%;background:${color || '#7a706a'};border:2.5px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,0.35);"></div>`,
       className:'', iconSize:[16,16], iconAnchor:[8,8],
     });
     const m = L.marker([ev.lat, ev.lng], { icon })
