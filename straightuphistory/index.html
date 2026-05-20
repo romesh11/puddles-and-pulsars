@@ -393,7 +393,7 @@
     display: none; align-items: center; justify-content: center;
   }
   #timeline-loader svg {
-    width: 80px; height: 80px;
+    width: 280px; height: 100px;
     animation: logo-breathe 2.4s ease-in-out infinite;
   }
   @keyframes logo-breathe {
@@ -606,37 +606,43 @@
     <div id="timeline-view">
       <div id="timeline-canvas"></div>
       <div id="timeline-loader">
-        <svg width="80" height="80" viewBox="0 0 122 176" xmlns="http://www.w3.org/2000/svg">
-          <rect x="11" y="24" width="102" height="132" rx="3" fill="#3d1f0a" opacity="0.3"/>
-          <rect x="10" y="22" width="102" height="132" rx="3" fill="#7c4a1e"/>
-          <rect x="10" y="22" width="102" height="132" rx="3" fill="#8b5e2d" opacity="0.6"/>
-          <rect x="18" y="30" width="86" height="116" rx="2" fill="#c8914a" opacity="0.25"/>
-          <line x1="18" y1="55" x2="96" y2="55" stroke="#a0622a" stroke-width="0.4" opacity="0.4"/>
-          <line x1="18" y1="75" x2="96" y2="75" stroke="#a0622a" stroke-width="0.4" opacity="0.3"/>
-          <line x1="18" y1="95" x2="96" y2="95" stroke="#a0622a" stroke-width="0.4" opacity="0.4"/>
-          <line x1="18" y1="115" x2="96" y2="115" stroke="#a0622a" stroke-width="0.4" opacity="0.3"/>
-          <ellipse cx="61" cy="22" rx="51" ry="9" fill="#6b3a14"/>
-          <ellipse cx="61" cy="19" rx="40" ry="5" fill="#8b5e2d" opacity="0.5"/>
-          <ellipse cx="61" cy="154" rx="51" ry="9" fill="#6b3a14"/>
-          <ellipse cx="61" cy="157" rx="40" ry="5" fill="#8b5e2d" opacity="0.4"/>
-          <line x1="34" y1="40" x2="34" y2="142" stroke="#3d1a05" stroke-width="1.5" stroke-linecap="round" opacity="0.8"/>
-          <circle cx="34" cy="54" r="4.5" fill="#3d1a05" opacity="0.9"/>
-          <circle cx="34" cy="54" r="2.5" fill="#f5deb3"/>
-          <line x1="39" y1="54" x2="88" y2="54" stroke="#3d1a05" stroke-width="1" stroke-linecap="round" opacity="0.7"/>
-          <circle cx="34" cy="88" r="4.5" fill="#3d1a05" opacity="0.9"/>
-          <circle cx="34" cy="88" r="2.5" fill="#f5deb3"/>
-          <line x1="39" y1="88" x2="88" y2="88" stroke="#3d1a05" stroke-width="1" stroke-linecap="round" opacity="0.7"/>
-          <circle cx="34" cy="122" r="4.5" fill="#3d1a05" opacity="0.9"/>
-          <circle cx="34" cy="122" r="2.5" fill="#f5deb3"/>
-          <line x1="39" y1="122" x2="82" y2="122" stroke="#3d1a05" stroke-width="1" stroke-linecap="round" opacity="0.6"/>
-          <g transform="translate(76,24)">
-            <circle cx="18" cy="18" r="15" fill="#5c1a0a" opacity="0.3"/>
-            <circle cx="18" cy="16" r="11" fill="#8b1a0a"/>
-            <circle cx="18" cy="15" r="6" fill="#c0392b"/>
-            <circle cx="16" cy="13" r="2.5" fill="#e74c3c" opacity="0.7"/>
-            <path d="M11 23 Q18 36 25 23" fill="#8b1a0a"/>
-            <line x1="18" y1="32" x2="18" y2="38" stroke="#8b1a0a" stroke-width="1.2" stroke-linecap="round"/>
-          </g>
+        <svg id="scroll-svg" viewBox="0 0 280 100" xmlns="http://www.w3.org/2000/svg" style="width:280px;height:100px;">
+  <!-- Scroll body shadow -->
+  <rect x="32" y="18" width="216" height="66" rx="3" fill="#3d1f0a" opacity="0.15"/>
+  <!-- Scroll body -->
+  <rect x="30" y="16" width="220" height="64" rx="3" fill="#c8a06e"/>
+  <!-- Scroll body inner parchment -->
+  <rect x="30" y="16" width="220" height="64" rx="3" fill="#f0d9b5" opacity="0.6"/>
+  <!-- Subtle horizontal lines on parchment -->
+  <line x1="50" y1="32" x2="230" y2="32" stroke="#a0622a" stroke-width="0.4" opacity="0.3"/>
+  <line x1="50" y1="56" x2="230" y2="56" stroke="#a0622a" stroke-width="0.4" opacity="0.3"/>
+  <line x1="50" y1="72" x2="230" y2="72" stroke="#a0622a" stroke-width="0.4" opacity="0.3"/>
+  <!-- Left rolled end -->
+  <ellipse cx="30" cy="48" rx="10" ry="32" fill="#8b5e2d"/>
+  <ellipse cx="30" cy="48" rx="7" ry="28" fill="#a07040" opacity="0.6"/>
+  <ellipse cx="30" cy="48" rx="4" ry="24" fill="#6b3a14" opacity="0.4"/>
+  <!-- Right rolled end -->
+  <ellipse cx="250" cy="48" rx="10" ry="32" fill="#8b5e2d"/>
+  <ellipse cx="250" cy="48" rx="7" ry="28" fill="#a07040" opacity="0.6"/>
+  <ellipse cx="250" cy="48" rx="4" ry="24" fill="#6b3a14" opacity="0.4"/>
+  <!-- Timeline axis line -->
+  <line x1="50" y1="48" x2="230" y2="48" stroke="#3d1a05" stroke-width="1.2" stroke-linecap="round" opacity="0.7"/>
+  <!-- Event dot 1 — war red — above -->
+  <line x1="90" y1="48" x2="90" y2="34" stroke="#c0392b" stroke-width="0.8" opacity="0.6"/>
+  <circle cx="90" cy="30" r="4" fill="#c0392b"/>
+  <circle cx="90" cy="30" r="2" fill="#f5deb3"/>
+  <!-- Event dot 2 — teal birth — below -->
+  <line x1="130" y1="48" x2="130" y2="62" stroke="#1a7a6e" stroke-width="0.8" opacity="0.6"/>
+  <circle cx="130" cy="66" r="4" fill="#1a7a6e"/>
+  <circle cx="130" cy="66" r="2" fill="#f5deb3"/>
+  <!-- Event dot 3 — amber monument — above -->
+  <line x1="170" y1="48" x2="170" y2="34" stroke="#9a6b1f" stroke-width="0.8" opacity="0.6"/>
+  <circle cx="170" cy="30" r="4" fill="#9a6b1f"/>
+  <circle cx="170" cy="30" r="2" fill="#f5deb3"/>
+  <!-- Event dot 4 — blue event — below -->
+  <line x1="210" y1="48" x2="210" y2="62" stroke="#2c5f9e" stroke-width="0.8" opacity="0.6"/>
+  <circle cx="210" cy="66" r="4" fill="#2c5f9e"/>
+  <circle cx="210" cy="66" r="2" fill="#f5deb3"/>
         </svg>
       </div>
       <div id="touch-hint">Swipe to explore · Pinch to zoom</div>
