@@ -714,21 +714,16 @@ function applyTransform() {
   document.getElementById('timeline-canvas').style.transform = `translateX(${panX}px)`;
 }
 
-function scheduleRedraw() {
-  if (rafPending) return;
-  rafPending = true;
-  requestAnimationFrame(() => { rafPending = false; renderTimeline(); });
-}
-
 // ── Scale indicator ──
 function updateScaleLabel() {
-  // Show approximate years-per-screen
   const yearsVisible = YEAR_SPAN / (canvasW() / getVW());
   let label;
-  if (yearsVisible >= 200) label = Math.round(yearsVisible) + ' yrs';
-  else if (yearsVisible >= 10) label = Math.round(yearsVisible) + ' yrs';
-  else if (yearsVisible >= 1)  label = yearsVisible.toFixed(1) + ' yrs';
-  else label = (yearsVisible * 12).toFixed(0) + ' mo';
+  if      (yearsVisible >= 200)  label = Math.round(yearsVisible) + ' yrs';
+  else if (yearsVisible >= 10)   label = Math.round(yearsVisible) + ' yrs';
+  else if (yearsVisible >= 1)    label = yearsVisible.toFixed(1) + ' yrs';
+  else if (yearsVisible >= 1/12) label = Math.round(yearsVisible * 12) + ' mo';
+  else if (yearsVisible >= 1/52) label = Math.round(yearsVisible * 52) + ' wks';
+  else                           label = Math.round(yearsVisible * 365) + ' days';
   document.getElementById('scale-label').textContent = label;
 }
 
@@ -1212,7 +1207,7 @@ function parsePipeList(raw) {
 
 // Map a flat row object (keys = column headers) to our event schema
 function parseSheetRow(row) {
-  return {
+  const obj = {
     id:          Number(row.id)           || 0,
     title:       row.title                || '',
     date:        row.date                 || '',
