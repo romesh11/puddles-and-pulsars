@@ -1218,10 +1218,14 @@ const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbxBl_QK7vFQ3i-Gw33K9
 function driveUrlToImg(url) {
   if (!url) return '';
   const m1 = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
-  if (m1) return `https://drive.google.com/uc?export=view&id=${m1[1]}`;
+  const rk = url.match(/resourcekey=([a-zA-Z0-9_-]+)/);
+  if (m1) {
+    let direct = `https://drive.google.com/uc?export=view&id=${m1[1]}`;
+    if (rk) direct += `&resourcekey=${rk[1]}`;
+    return direct;
+  }
   const m2 = url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
   if (m2) return `https://drive.google.com/uc?export=view&id=${m2[1]}`;
-  // Already a direct URL or other host — return as-is
   return url;
 }
 
