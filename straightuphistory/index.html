@@ -1332,7 +1332,9 @@ function openModal(ev) {
   if (ev.image_url) {
     img.src = ev.image_url;
     img.alt = ev.title;
-    wrap.classList.remove('hidden');
+    img.onload  = () => wrap.classList.remove('hidden');
+    img.onerror = () => { wrap.classList.add('hidden'); img.src = ''; };
+    wrap.classList.add('hidden'); // hide until confirmed loaded
   } else {
     wrap.classList.add('hidden');
     img.src = '';
