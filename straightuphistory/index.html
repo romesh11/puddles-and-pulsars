@@ -762,66 +762,168 @@ function renderTimeline() {
   // ── Adaptive tick interval ──
   // We want roughly 6–14 ticks visible at a time
   const yearsOnScreen = YEAR_SPAN * (vw / cw);
-  let interval = 100;
-  if (yearsOnScreen < 200) interval = 50;
-  if (yearsOnScreen < 80)  interval = 25;
-  if (yearsOnScreen < 30)  interval = 10;
-  if (yearsOnScreen < 10)  interval = 5;
-  if (yearsOnScreen < 4)   interval = 2;
-  if (yearsOnScreen < 1.5) interval = 1;
+  const buf = 150;
+  const visStart = YEAR_START + (-panX - buf) / cw * YEAR_SPAN;
+  const visEnd   = YEAR_START + (-panX + vw + buf) / cw * YEAR_SPAN;
 
-  // Only render ticks in viewport (+ small buffer)
-  const buf = 100;
-  const visStart = YEAR_START + Math.max(0, (-panX - buf) / cw * YEAR_SPAN);
-  const visEnd   = YEAR_START + Math.min(YEAR_SPAN, (-panX + vw + buf) / cw * YEAR_SPAN);
-  const tickStart = Math.floor(visStart / interval) * interval;
+  // ── MONTH names and days per month ──
+  const MONTHS_SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const DAYS_IN_MONTH = [31,28,31,30,31,30,31,31,30,31,30,31];
 
-  for (let yr = tickStart; yr <= visEnd; yr += interval) {
-    if (yr < YEAR_START || yr > YEAR_END) continue;
-    const x = yearToPx(yr) * scale;
-    const major = (yr % 100 === 0) || (interval <= 10 && yr % 10 === 0);
-    const h = major ? 14 : 7;
+  // ════════════════════════════
+  //  TICK MODE — year, month, or week
+  // ════════════════════════════
+  if (yearsOnScreen >= 1.5) {
+    // ── YEAR TICKS ──
+    let interval = 100;
+    if (yearsOnScreen < 200) interval = 50;
+    if (yearsOnScreen < 80)  interval = 25;
+    if (yearsOnScreen < 30)  interval = 10;
+    if (yearsOnScreen < 10)  interval = 5;
+    if (yearsOnScreen < 4)   interval = 2;
+    if (yearsOnScreen < 1.5) interval = 1;
 
-    const tick = document.createElement('div');
-    tick.className = 'tick-mark' + (major ? ' major' : '');
-    tick.style.cssText = `left:${x}px;top:${midY - h}px;height:${h}px;`;
-    canvas.appendChild(tick);
+    const tickStart = Math.floor(visStart / interval) * interval;
+    for (let yr = tickStart; yr <= visEnd; yr += interval) {
+      if (yr < YEAR_START || yr > YEAR_END) continue;
+      const x = yearToPx(yr) * scale;
+      const major = yr % 100 === 0;
+      const h = major ? 16 : 8;
+      const tick = document.createElement('div');
+      tick.className = 'tick-mark' + (major ? ' major' : '');
+      tick.style.cssText = `left:${x}px;top:${midY - h}px;height:${h}px;`;
+      canvas.appendChild(tick);
+      const lbl = document.createElement('div');
+      lbl.className = 'tick-label';
+      lbl.textContent = yr;
+      lbl.style.cssText = `left:${x}px;top:${midY + 10}px;`;
+      canvas.appendChild(lbl);
+    }
 
-    const lbl = document.createElement('div');
-    lbl.className = 'tick-label';
-    lbl.textContent = yr;
-    lbl.style.cssText = `left:${x}px;top:${midY + 10}px;`;
-    canvas.appendChild(lbl);
+  } else if (yearsOnScreen >= 1/12) {
+    // ── MONTH TICKS — we're showing less than 1.5 years ──
+    // Find the first whole year in view
+    const startYear = Math.floor(Math.max(visStart, YEAR_START));
+    const endYear   = Math.ceil(Math.min(visEnd, YEAR_END));
+
+    for (let yr = startYear; yr <= endYear; yr++) {
+      // Year marker — big tick
+      const yrX = yearToPx(yr) * scale;
+      if (yrX + panX > -buf && yrX + panX < vw + buf) {
+        const tick = document.createElement('div');
+        tick.className = 'tick-mark major';
+        tick.style.cssText = `left:${yrX}px;top:${midY - 18}px;height:18px;`;
+        canvas.appendChild(tick);
+        const lbl = document.createElement('div');
+        lbl.className = 'tick-label';
+        lbl.style.cssText = `left:${yrX}px;top:${midY + 10}px;font-size:11px;color:#7a706a;`;
+        lbl.textContent = yr;
+        canvas.appendChild(lbl);
+      }
+
+      // Month markers
+      let dayCount = 0;
+      for (let mo = 0; mo < 12; mo++) {
+        const moFrac = yr + dayCount / 365;
+        dayCount += DAYS_IN_MONTH[mo];
+        if (moFrac < visStart || moFrac > visEnd) continue;
+        if (mo === 0) continue; // already drawn as year tick
+        const x = yearToPx(moFrac) * scale;
+        const tick = document.createElement('div');
+        tick.className = 'tick-mark';
+        tick.style.cssText = `left:${x}px;top:${midY - 10}px;height:10px;`;
+        canvas.appendChild(tick);
+        const lbl = document.createElement('div');
+        lbl.className = 'tick-label';
+        lbl.style.cssText = `left:${x}px;top:${midY + 10}px;font-size:9px;`;
+        lbl.textContent = MONTHS_SHORT[mo];
+        canvas.appendChild(lbl);
+      }
+    }
+
+  } else {
+    // ── WEEK TICKS — showing less than 1 month ──
+    const startYear = Math.floor(Math.max(visStart, YEAR_START));
+    const endYear   = Math.ceil(Math.min(visEnd, YEAR_END));
+
+    for (let yr = startYear; yr <= endYear; yr++) {
+      // Year marker
+      const yrX = yearToPx(yr) * scale;
+      if (yrX + panX > -buf && yrX + panX < vw + buf) {
+        const tick = document.createElement('div');
+        tick.className = 'tick-mark major';
+        tick.style.cssText = `left:${yrX}px;top:${midY - 20}px;height:20px;`;
+        canvas.appendChild(tick);
+        const lbl = document.createElement('div');
+        lbl.className = 'tick-label';
+        lbl.style.cssText = `left:${yrX}px;top:${midY + 10}px;font-size:11px;color:#7a706a;`;
+        lbl.textContent = yr;
+        canvas.appendChild(lbl);
+      }
+
+      // Month markers
+      let dayCount = 0;
+      for (let mo = 0; mo < 12; mo++) {
+        const moFrac = yr + dayCount / 365;
+        dayCount += DAYS_IN_MONTH[mo];
+        if (mo > 0 && moFrac >= visStart && moFrac <= visEnd) {
+          const x = yearToPx(moFrac) * scale;
+          const tick = document.createElement('div');
+          tick.className = 'tick-mark major';
+          tick.style.cssText = `left:${x}px;top:${midY - 14}px;height:14px;`;
+          canvas.appendChild(tick);
+          const lbl = document.createElement('div');
+          lbl.className = 'tick-label';
+          lbl.style.cssText = `left:${x}px;top:${midY + 10}px;font-size:10px;color:#7a706a;`;
+          lbl.textContent = MONTHS_SHORT[mo];
+          canvas.appendChild(lbl);
+        }
+
+        // Week markers within this month
+        const daysThisMonth = DAYS_IN_MONTH[mo];
+        for (let w = 7; w < daysThisMonth; w += 7) {
+          const wFrac = yr + (dayCount - daysThisMonth + w) / 365;
+          if (wFrac < visStart || wFrac > visEnd) continue;
+          const x = yearToPx(wFrac) * scale;
+          const tick = document.createElement('div');
+          tick.className = 'tick-mark';
+          tick.style.cssText = `left:${x}px;top:${midY - 7}px;height:7px;`;
+          canvas.appendChild(tick);
+          // Only show week label if zoomed enough
+          if (yearsOnScreen < 1/26) {
+            const lbl = document.createElement('div');
+            lbl.className = 'tick-label';
+            lbl.style.cssText = `left:${x}px;top:${midY + 10}px;font-size:8px;color:#b5ada6;`;
+            lbl.textContent = `W${Math.ceil(w/7)}`;
+            canvas.appendChild(lbl);
+          }
+        }
+      }
+    }
   }
 
-  // ── Events ──
+  // ════════════════════════════
+  //  EVENT DOTS
+  // ════════════════════════════
   const visible = getVisibleEvents();
-  // Stagger: assign alternating above/below per sorted year order
-  const sorted = [...visible].sort((a,b) => a.year - b.year);
+  const sorted = [...visible].sort((a,b) => (a._decimalYear||a.year) - (b._decimalYear||b.year));
 
   sorted.forEach((ev, i) => {
-    const x = yearToPx(ev.year) * scale;
-    // skip if far off screen
+    // Use decimal year for precise positioning, fall back to integer year
+    const decYear = ev._decimalYear || ev.year;
+    const x = yearToPx(decYear) * scale;
     if (x + panX < -80 || x + panX > vw + 80) return;
 
     const above = (i % 2 === 0);
-    // Arm length scales: shorter at low zoom, longer at high zoom
-    const armLen = Math.min(60, Math.max(28, scale * 8));
+    const armLen = Math.min(60, Math.max(28, scale * 0.4));
     const dotY = midY + (above ? -armLen : armLen);
 
-    // ── Connector ──
     const conn = document.createElement('div');
     conn.className = 'connector';
     const connColor = CAT_COLORS[ev.category];
-    conn.style.cssText = `
-      left:${x}px;
-      top:${above ? dotY : midY}px;
-      height:${armLen}px;
-      background: linear-gradient(to ${above?'bottom':'top'}, transparent, ${connColor}55);
-    `;
+    conn.style.cssText = `left:${x}px;top:${above ? dotY : midY}px;height:${armLen}px;background:linear-gradient(to ${above?'bottom':'top'}, transparent, ${connColor}55);`;
     canvas.appendChild(conn);
 
-    // ── Dot ──
     const dot = document.createElement('div');
     dot.className = `event-dot ${ev.category}`;
     dot.style.cssText = `left:${x}px;top:${dotY}px;animation-delay:${i*0.05}s;`;
@@ -830,27 +932,21 @@ function renderTimeline() {
     dot.addEventListener('mousemove',  (e) => moveTooltip(e));
     dot.addEventListener('mouseleave', hideTooltip);
     dot.addEventListener('click',      (e) => { e.stopPropagation(); openModal(ev); });
-    // Touch tap: handled via touchend on the timeline-view (see below)
     dot._evData = ev;
     canvas.appendChild(dot);
 
-    // ── Year label (always shown) ──
+    // Label: show full date at high zoom, just year at low zoom
+    const labelText = yearsOnScreen <= 2 ? ev.date : String(ev.year);
     const yearLbl = document.createElement('div');
     yearLbl.className = 'event-year-label';
-    yearLbl.textContent = ev.year;
-    yearLbl.style.cssText = `left:${x}px;top:${above ? dotY-16 : dotY+14}px;`;
+    yearLbl.textContent = labelText;
+    yearLbl.style.cssText = `left:${x}px;top:${above ? dotY-16 : dotY+14}px;font-size:${yearsOnScreen <= 2 ? 8 : 9}px;`;
     canvas.appendChild(yearLbl);
 
-    // ── Title label (appears when zoomed enough to show ~50 yrs or less) ──
     const titleLbl = document.createElement('div');
     titleLbl.className = 'event-title-label' + (yearsOnScreen <= 80 ? ' show' : '');
     titleLbl.textContent = ev.title;
-    titleLbl.style.cssText = `
-      left:${x}px;
-      top:${above ? dotY - 30 : dotY + 24}px;
-      color:${CAT_COLORS[ev.category]};
-      font-size:${Math.min(12, Math.max(9, scale * 0.8))}px;
-    `;
+    titleLbl.style.cssText = `left:${x}px;top:${above ? dotY-30 : dotY+24}px;color:${CAT_COLORS[ev.category]};font-size:${Math.min(12, Math.max(9, scale * 0.08))}px;`;
     canvas.appendChild(titleLbl);
   });
 }
