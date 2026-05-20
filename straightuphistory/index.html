@@ -443,9 +443,33 @@
   }
   
   @media (max-width: 640px) {
-    #modal { padding: 24px 20px; }
+
+    /* Modal */
     #modal .m-title { font-size: 22px; }
+    #modal .m-body { padding: 20px 18px 24px; }
     .chip span { display: none; }
+
+    /* Header — hide toggle labels and sync text */
+    #toggle-label-timeline,
+    #toggle-label-map { display: none; }
+    #cal-btn span { display: none; }
+    #cal-btn { padding: 5px 8px; }
+
+    /* Hide zoom controls — pinch zoom works on mobile */
+    #zoom-controls { display: none !important; }
+
+    /* Loader SVG — scale down for small screens */
+    #scroll-svg { width: 220px; height: 79px; }
+
+    /* Calendar buttons in modal — stack vertically */
+    .m-cal-row { flex-wrap: wrap; gap: 6px; }
+    .m-cal-btn { flex: 1; justify-content: center; min-width: 80px; }
+
+    /* Cal dropdown — full width on mobile */
+    #cal-dropdown { right: -10px; min-width: 200px; }
+
+    /* Touch hint visible */
+    #touch-hint { display: block; }
   }
 </style>
 
