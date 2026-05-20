@@ -385,30 +385,61 @@
   }
   .event-dot { animation: dotIn 0.35s cubic-bezier(.4,0,.2,1) both; }
   
-  /* Pulsing logo loader */
+  /* Scroll loader */
   #timeline-loader {
     position: absolute; top: 50%; left: 50%;
     transform: translate(-50%, -50%);
     z-index: 50; pointer-events: none;
     display: none; align-items: center; justify-content: center;
   }
-  #timeline-loader svg {
-    width: 280px; height: 100px;
-    animation: logo-breathe 2.4s ease-in-out infinite;
-  }
-  @keyframes logo-breathe {
-    0%   { transform: scale(1.0);  opacity: 0.7; filter: drop-shadow(0 0 0px rgba(139,94,45,0)); }
-    50%  { transform: scale(1.08); opacity: 1;   filter: drop-shadow(0 4px 12px rgba(139,94,45,0.35)); }
-    100% { transform: scale(1.0);  opacity: 0.7; filter: drop-shadow(0 0 0px rgba(139,94,45,0)); }
-  }
   #timeline-loader.visible { display: flex; }
+  #timeline-loader.hiding {
+    display: flex; align-items: center; justify-content: center;
+    animation: loaderFadeOut 0.4s ease forwards;
+  }
   @keyframes loaderFadeOut {
     from { opacity: 1; }
     to   { opacity: 0; }
   }
-  #timeline-loader.hiding {
-    display: flex; align-items: center; justify-content: center;
-    animation: loaderFadeOut 0.4s ease forwards;
+
+  /* The whole SVG fades in then breathes */
+  #scroll-svg {
+    width: 280px; height: 100px;
+    animation:
+      scroll-fadein 0.3s ease forwards,
+      logo-breathe 2.4s ease-in-out 1.5s infinite;
+    opacity: 0;
+  }
+
+  @keyframes scroll-fadein {
+    from { opacity: 0; }
+    to   { opacity: 0.7; }
+  }
+
+  @keyframes logo-breathe {
+    0%   { transform: scale(1.0);  opacity: 0.7; filter: drop-shadow(0 0 0px rgba(139,94,45,0)); }
+    50%  { transform: scale(1.06); opacity: 1;   filter: drop-shadow(0 4px 14px rgba(139,94,45,0.3)); }
+    100% { transform: scale(1.0);  opacity: 0.7; filter: drop-shadow(0 0 0px rgba(139,94,45,0)); }
+  }
+
+  /* Scroll body unrolls from centre outward */
+  #scroll-body { transform-origin: center; animation: unroll 1.2s cubic-bezier(.4,0,.2,1) 0.2s both; }
+  #scroll-lines { animation: unroll 1.2s cubic-bezier(.4,0,.2,1) 0.2s both; }
+  #scroll-axis  { animation: unroll 1.0s cubic-bezier(.4,0,.2,1) 0.4s both; }
+  #scroll-dots  { animation: unroll 0.8s cubic-bezier(.4,0,.2,1) 0.7s both; }
+
+  @keyframes unroll {
+    from { clip-path: inset(0 50% 0 50%); opacity: 0; }
+    to   { clip-path: inset(0 0% 0 0%);   opacity: 1; }
+  }
+
+  /* Rolled ends pop in first */
+  #scroll-end-left  { animation: pop-in 0.3s cubic-bezier(.4,0,.2,1) 0s both; }
+  #scroll-end-right { animation: pop-in 0.3s cubic-bezier(.4,0,.2,1) 0.1s both; }
+
+  @keyframes pop-in {
+    from { transform: scale(0.5); opacity: 0; }
+    to   { transform: scale(1);   opacity: 1; }
   }
   
   @media (max-width: 640px) {
@@ -608,42 +639,48 @@
       <div id="timeline-loader">
         <svg id="scroll-svg" viewBox="0 0 280 100" xmlns="http://www.w3.org/2000/svg" style="width:280px;height:100px;">
   <!-- Scroll body shadow -->
-  <rect x="32" y="18" width="216" height="66" rx="3" fill="#3d1f0a" opacity="0.15"/>
-  <!-- Scroll body -->
-  <rect x="30" y="16" width="220" height="64" rx="3" fill="#c8a06e"/>
-  <!-- Scroll body inner parchment -->
-  <rect x="30" y="16" width="220" height="64" rx="3" fill="#f0d9b5" opacity="0.6"/>
-  <!-- Subtle horizontal lines on parchment -->
-  <line x1="50" y1="32" x2="230" y2="32" stroke="#a0622a" stroke-width="0.4" opacity="0.3"/>
-  <line x1="50" y1="56" x2="230" y2="56" stroke="#a0622a" stroke-width="0.4" opacity="0.3"/>
-  <line x1="50" y1="72" x2="230" y2="72" stroke="#a0622a" stroke-width="0.4" opacity="0.3"/>
+  <g id="scroll-body">
+    <rect x="32" y="18" width="216" height="66" rx="3" fill="#3d1f0a" opacity="0.15"/>
+    <rect x="30" y="16" width="220" height="64" rx="3" fill="#c8a06e"/>
+    <rect x="30" y="16" width="220" height="64" rx="3" fill="#f0d9b5" opacity="0.6"/>
+  </g>
+  <g id="scroll-lines">
+    <line x1="50" y1="32" x2="230" y2="32" stroke="#a0622a" stroke-width="0.4" opacity="0.3"/>
+    <line x1="50" y1="56" x2="230" y2="56" stroke="#a0622a" stroke-width="0.4" opacity="0.3"/>
+    <line x1="50" y1="72" x2="230" y2="72" stroke="#a0622a" stroke-width="0.4" opacity="0.3"/>
+  </g>
   <!-- Left rolled end -->
-  <ellipse cx="30" cy="48" rx="10" ry="32" fill="#8b5e2d"/>
-  <ellipse cx="30" cy="48" rx="7" ry="28" fill="#a07040" opacity="0.6"/>
-  <ellipse cx="30" cy="48" rx="4" ry="24" fill="#6b3a14" opacity="0.4"/>
+  <g id="scroll-end-left">
+    <ellipse cx="30" cy="48" rx="10" ry="32" fill="#8b5e2d"/>
+    <ellipse cx="30" cy="48" rx="7" ry="28" fill="#a07040" opacity="0.6"/>
+    <ellipse cx="30" cy="48" rx="4" ry="24" fill="#6b3a14" opacity="0.4"/>
+  </g>
   <!-- Right rolled end -->
-  <ellipse cx="250" cy="48" rx="10" ry="32" fill="#8b5e2d"/>
-  <ellipse cx="250" cy="48" rx="7" ry="28" fill="#a07040" opacity="0.6"/>
-  <ellipse cx="250" cy="48" rx="4" ry="24" fill="#6b3a14" opacity="0.4"/>
+  <g id="scroll-end-right">
+    <ellipse cx="250" cy="48" rx="10" ry="32" fill="#8b5e2d"/>
+    <ellipse cx="250" cy="48" rx="7" ry="28" fill="#a07040" opacity="0.6"/>
+    <ellipse cx="250" cy="48" rx="4" ry="24" fill="#6b3a14" opacity="0.4"/>
+  </g>
   <!-- Timeline axis line -->
-  <line x1="50" y1="48" x2="230" y2="48" stroke="#3d1a05" stroke-width="1.2" stroke-linecap="round" opacity="0.7"/>
-  <!-- Event dot 1 — war red — above -->
-  <line x1="90" y1="48" x2="90" y2="34" stroke="#c0392b" stroke-width="0.8" opacity="0.6"/>
-  <circle cx="90" cy="30" r="4" fill="#c0392b"/>
-  <circle cx="90" cy="30" r="2" fill="#f5deb3"/>
-  <!-- Event dot 2 — teal birth — below -->
-  <line x1="130" y1="48" x2="130" y2="62" stroke="#1a7a6e" stroke-width="0.8" opacity="0.6"/>
-  <circle cx="130" cy="66" r="4" fill="#1a7a6e"/>
-  <circle cx="130" cy="66" r="2" fill="#f5deb3"/>
-  <!-- Event dot 3 — amber monument — above -->
-  <line x1="170" y1="48" x2="170" y2="34" stroke="#9a6b1f" stroke-width="0.8" opacity="0.6"/>
-  <circle cx="170" cy="30" r="4" fill="#9a6b1f"/>
-  <circle cx="170" cy="30" r="2" fill="#f5deb3"/>
-  <!-- Event dot 4 — blue event — below -->
-  <line x1="210" y1="48" x2="210" y2="62" stroke="#2c5f9e" stroke-width="0.8" opacity="0.6"/>
-  <circle cx="210" cy="66" r="4" fill="#2c5f9e"/>
-  <circle cx="210" cy="66" r="2" fill="#f5deb3"/>
-        </svg>
+  <g id="scroll-axis">
+    <line x1="50" y1="48" x2="230" y2="48" stroke="#3d1a05" stroke-width="1.2" stroke-linecap="round" opacity="0.7"/>
+  </g>
+  <!-- Event dots -->
+  <g id="scroll-dots">
+    <line x1="90" y1="48" x2="90" y2="34" stroke="#c0392b" stroke-width="0.8" opacity="0.6"/>
+    <circle cx="90" cy="30" r="4" fill="#c0392b"/>
+    <circle cx="90" cy="30" r="2" fill="#f5deb3"/>
+    <line x1="130" y1="48" x2="130" y2="62" stroke="#1a7a6e" stroke-width="0.8" opacity="0.6"/>
+    <circle cx="130" cy="66" r="4" fill="#1a7a6e"/>
+    <circle cx="130" cy="66" r="2" fill="#f5deb3"/>
+    <line x1="170" y1="48" x2="170" y2="34" stroke="#9a6b1f" stroke-width="0.8" opacity="0.6"/>
+    <circle cx="170" cy="30" r="4" fill="#9a6b1f"/>
+    <circle cx="170" cy="30" r="2" fill="#f5deb3"/>
+    <line x1="210" y1="48" x2="210" y2="62" stroke="#2c5f9e" stroke-width="0.8" opacity="0.6"/>
+    <circle cx="210" cy="66" r="4" fill="#2c5f9e"/>
+    <circle cx="210" cy="66" r="2" fill="#f5deb3"/>
+  </g>
+</svg>
       </div>
       <div id="touch-hint">Swipe to explore · Pinch to zoom</div>
     </div>
