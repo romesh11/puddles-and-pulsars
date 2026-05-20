@@ -1384,6 +1384,7 @@ function openModal(ev) {
   // Re-init lucide icons inside the modal (new icons injected above)
   lucide.createIcons({ attrs: { 'stroke-width': 1.5 } });
 
+  updateModalCalLinks(ev);
   document.getElementById('modal-overlay').classList.add('open');
   // Scroll modal body back to top
   document.querySelector('#modal .m-body').scrollTop = 0;
@@ -1462,9 +1463,169 @@ function renderMapMarkers() {
 function toggleCalDropdown(e) {
   e.stopPropagation();
   document.getElementById('cal-dropdown').classList.toggle('open');
+  lucide.createIcons({ attrs: { 'stroke-width': 1.5 } });
 }
 document.addEventListener('click', () => {
   document.getElementById('cal-dropdown').classList.remove('open');
+});
+
+// ── Toggle all category checkboxes ──
+function toggleSyncAll(el) {
+  document.querySelectorAll('.sync-cat-cb').forEach(cb => cb.checked = el.checked);
+}
+
+// ── Keep "all" checkbox in sync when individual ones change ──
+document.addEventListener('change', (e) => {
+  if (e.target.classList.contains('sync-cat-cb')) {
+    const all  = document.querySelectorAll('.sync-cat-cb');
+    const checked = document.querySelectorAll('.sync-cat-cb:checked');
+    document.getElementById('sync-all').checked = all.length === checked.length;
+  }
+});
+
+// ═══════════════════════════════════════════════════
+//  CALENDAR INTEGRATION
+// ═══════════════════════════════════════════════════
+
+// ── Format a date string like "20 July 1969" to YYYYMMDD for calendar links ──
+function dateToCalFormat(dateStr, year) {
+  const months = { jan:'01',feb:'02',mar:'03',apr:'04',may:'05',jun:'06',
+                   jul:'07',aug:'08',sep:'09',oct:'10',nov:'11',dec:'12' };
+  if (!dateStr) return `${year}0101`;
+  const s = dateStr.toLowerCase().replace(/,/g, '').split(/\s+/);
+  let day = '01', month = '01', yr = String(year);
+  s.forEach(p => {
+    const n = parseInt(p);
+    if (!isNaN(n)) {
+      if (n > 31) yr = String(n);
+      else day = String(n).padStart(2, '0');
+    } else {
+      const key = p.slice(0, 3);
+      if (months[key]) month = months[key];
+    }
+  });
+  return `${yr}${month}${day}`;
+}
+
+// ── Build calendar deep links ──
+function buildGoogleLink(ev) {
+  const date  = dateToCalFormat(ev.date, ev.year);
+  const end   = ev.year_end
+    ? dateToCalFormat(ev.date, ev.year_end)
+    : date;
+  // All-day event: end date must be day after in Google Calendar
+  const endDate = incrementDate(end);
+  const title = encodeURIComponent(ev.title + ' (' + ev.year + ')');
+  const desc  = encodeURIComponent(ev.description || '');
+  return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${date}/${endDate}&details=${desc}&sf=true&output=xml`;
+}
+
+function buildAppleLink(ev) {
+  const date  = dateToCalFormat(ev.date, ev.year);
+  const end   = ev.year_end
+    ? dateToCalFormat(ev.date, ev.year_end)
+    : date;
+  const endDate = incrementDate(end);
+  const title = encodeURIComponent(ev.title + ' (' + ev.year + ')');
+  const desc  = encodeURIComponent(ev.description || '');
+  return `webcal://p44-caldav.icloud.com/published/2/?title=${title}&startdt=${date}&enddt=${endDate}&notes=${desc}`;
+}
+
+function buildOutlookLink(ev) {
+  const date  = dateToCalFormat(ev.date, ev.year);
+  const end   = ev.year_end
+    ? dateToCalFormat(ev.date, ev.year_end)
+    : date;
+  const endDate = incrementDate(end);
+  const title = encodeURIComponent(ev.title + ' (' + ev.year + ')');
+  const desc  = encodeURIComponent(ev.description || '');
+  return `https://outlook.live.com/calendar/0/deeplink/compose?subject=${title}&startdt=${date}&enddt=${endDate}&body=${desc}&allday=true&path=%2Fcalendar%2Faction%2Fcompose&rru=addevent`;
+}
+
+// ── Helper: increment a YYYYMMDD string by one day ──
+function incrementDate(yyyymmdd) {
+  const yr  = parseInt(yyyymmdd.slice(0, 4));
+  const mo  = parseInt(yyyymmdd.slice(4, 6)) - 1;
+  const dy  = parseInt(yyyymmdd.slice(6, 8));
+  const d   = new Date(yr, mo, dy);
+  d.setDate(d.getDate() + 1);
+  const pad = n => String(n).padStart(2, '0');
+  return `${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}`;
+}
+
+// ── Update modal calendar links when an event is opened ──
+function updateModalCalLinks(ev) {
+  const g = document.getElementById('cal-google');
+  const a = document.getElementById('cal-apple');
+  const o = document.getElementById('cal-outlook');
+  if (g) g.href = buildGoogleLink(ev);
+  if (a) a.href = buildAppleLink(ev);
+  if (o) o.href = buildOutlookLink(ev);
+}
+
+// ── Generate and download .ics file for bulk sync ──
+function syncToCalendar() {
+  const checked = [...document.querySelectorAll('.sync-cat-cb:checked')]
+    .map(cb => cb.dataset.cat);
+  if (checked.length === 0) {
+    alert('Please select at least one category.');
+    return;
+  }
+
+  const selected = events.filter(ev => checked.includes(ev.category));
+  if (selected.length === 0) {
+    alert('No events found for the selected categories.');
+    return;
+  }
+
+  downloadICS(selected);
+  document.getElementById('cal-dropdown').classList.remove('open');
+}
+
+function downloadICS(eventsArr) {
+  const lines = [
+    'BEGIN:VCALENDAR',
+    'VERSION:2.0',
+    'PRODID:-//Straight Up History//EN',
+    'CALSCALE:GREGORIAN',
+    'METHOD:PUBLISH',
+    'X-WR-CALNAME:Straight Up History',
+    'X-WR-TIMEZONE:UTC',
+  ];
+
+  eventsArr.forEach(ev => {
+    const date    = dateToCalFormat(ev.date, ev.year);
+    const endDate = incrementDate(date);
+    const uid     = `suh-${ev.id}-${date}@straightuphistory`;
+    const title   = (ev.title + ' (' + ev.year + ')').replace(/,/g, '\\,');
+    const desc    = (ev.description || '').replace(/\n/g, '\\n').replace(/,/g, '\\,').slice(0, 500);
+    const now     = new Date().toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+
+    lines.push('BEGIN:VEVENT');
+    lines.push(`UID:${uid}`);
+    lines.push(`DTSTAMP:${now}`);
+    lines.push(`DTSTART;VALUE=DATE:${date}`);
+    lines.push(`DTEND;VALUE=DATE:${endDate}`);
+    lines.push(`SUMMARY:${title}`);
+    lines.push(`DESCRIPTION:${desc}`);
+    // Annual recurrence — shows up every year on this date
+    lines.push('RRULE:FREQ=YEARLY');
+    if (ev.read_more_url) lines.push(`URL:${ev.read_more_url}`);
+    lines.push('END:VEVENT');
+  });
+
+  lines.push('END:VCALENDAR');
+
+  const blob = new Blob([lines.join('\r\n')], { type: 'text/calendar;charset=utf-8' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = url;
+  a.download = 'straight-up-history.ics';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
 });
 
 // ═══════════════════════════════════════════════════
