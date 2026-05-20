@@ -254,10 +254,9 @@
   /* Data status badge */
   #data-status {
     position: fixed; bottom: 16px; right: 16px;
-    font-family: 'DM Mono', monospace; font-size: 9px;
-    color: #b5ada6; letter-spacing: 0.06em;
-    display: flex; align-items: center; gap: 5px;
-    z-index: 100; pointer-events: none;
+    display: flex; align-items: center;
+    z-index: 100; pointer-events: all;
+    cursor: default;
   }
   #data-status .ds-dot { width: 5px; height: 5px; border-radius: 50%; background: #b5ada6; }
   #data-status.live .ds-dot { background: #1a7a6e; }
@@ -379,9 +378,8 @@
 </div>
 
 <!-- ══════════ DATA STATUS ══════════ -->
-<div id="data-status">
+<div id="data-status" title="Connecting…">
   <div class="ds-dot"></div>
-  <span id="data-status-text">local data</span>
 </div>
 
 <!-- ══════════ APP SHELL ══════════ -->
@@ -1105,13 +1103,13 @@ function parseSheetRow(row) {
 
 function setDataStatus(state, text) {
   const el = document.getElementById('data-status');
-  el.className = state; // '', 'live', 'error'
-  document.getElementById('data-status-text').textContent = text;
+  el.className = state;
+  el.title = text;
 }
 
 async function loadFromSheets() {
   if (!SHEETS_URL) return; // use hardcoded data
-  setDataStatus('', 'loading…');
+  setDataStatus('', 'Connecting to Google Sheets…');
   try {
     const res  = await fetch(SHEETS_URL);
     const json = await res.json();
@@ -1119,13 +1117,13 @@ async function loadFromSheets() {
     // Replace global events array in place
     events.length = 0;
     json.forEach(row => events.push(parseSheetRow(row)));
-    setDataStatus('live', 'live · sheets');
+    setDataStatus('live', 'Connected to Google Sheets');
     renderTimeline();
     updateCount();
     if (currentView === 'map') renderMapMarkers();
   } catch(err) {
     console.warn('Sheets load failed, using local data:', err);
-    setDataStatus('error', 'sheets error · local data');
+    setDataStatus('error', 'Failed to connect to Google Sheets');
   }
 }
 
